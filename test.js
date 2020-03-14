@@ -43,11 +43,11 @@ function toStringRow(format, arr) {// NOTE I SHOULD CHANGE THE FOLLOWING 2 INTO 
         console.log(`${format[1]}: ${arr[1]}\n`);// Prints "Province/State:"
 
     if (process.argv[2] === "r")
-        console.log('Date || Total Recovered Cases\n');
+        console.log('Date || Total Recovered Cases');
     else if (process.argv[2] === "d")
-        console.log('Date || Total Deaths\n');
+        console.log('Date || Total Deaths');
     else
-        console.log('Date || Total Confirmed Cases\n');
+        console.log('Date || Total Confirmed Cases');
 
     let res = [];
 
@@ -58,14 +58,15 @@ function toStringRow(format, arr) {// NOTE I SHOULD CHANGE THE FOLLOWING 2 INTO 
     return res;
 }
 
+// Handle cases such as china (multiple references) properly
 function toStringSearchRow(data, region) {
     for (let i = 1; i < data.length; i++){
 
-        if (data[i][0].toLowerCase() === region.toLowerCase() || data[i][1].toLowerCase() === region.toLowerCase()){// csv was inconsistent so had to check both
+        if (data[i][0].toLowerCase().includes(region.toLowerCase()) || data[i][1].toLowerCase().includes(region.toLowerCase())){// csv was inconsistent so had to check both
             toStringRow(data[0], data[i]).forEach(e => {
                 console.log(`${e.format} || ${e.row}`)
             });
-            break;
+            console.log()
         }
     }
 }
