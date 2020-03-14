@@ -68,6 +68,12 @@ module.exports = {
             return bruh;
         }
 
+        /**
+         * Searches the row that contains the passed country and returns it.
+         * @param data
+         * @param country
+         * @returns {*[]}
+         */
         function searchRow(data, country) {
             if (country === 'all' || country === 'other') {
                 let initialRow = getRowData(data[0], data[1]);
