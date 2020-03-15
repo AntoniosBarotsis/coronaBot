@@ -33,9 +33,8 @@ module.exports = {
 
         getData(url);
 
-
         /**
-         * Parses url and prints the relevant filtered data (can be modified to return it instead which can be used for plotting later on).
+         * Parses url and prints the relevant filtered data
          * @param source
          */
         function getData(source) {
@@ -46,10 +45,9 @@ module.exports = {
                 .consume(object => rows.push(object)) // pushes everything into rows[]
                 .then(() => {
                     let arr = searchRow(rows, country); // Generates the array we want
-                    let finalArray = filterCasesDupes(filterCasesEmpty(arr)); // Filters out dates with no case number difference and dates with 0 cases
-                    message.channel.send('```JSON\n' + JSON.stringify(finalArray) + '```') // Sends data on discord in the form of a json document
+                    let finalArray = discordToString(filterCasesDupes(filterCasesEmpty(arr))); // Filters out dates with no case number difference and dates with 0 cases
+                    message.channel.send(finalArray) // Sends data on discord in the form of a json document
                 });
-
         }
 
         /**
@@ -141,7 +139,7 @@ module.exports = {
                 row1[i].value += row2[i].value;
             return row1;
         }
-        
+
         /**
          * Returns true if the passed country is the country of the passed row
          * @param arr
@@ -187,6 +185,15 @@ module.exports = {
                     finalArray.push(arr[i]);
 
             return finalArray;
+        }
+
+        /**
+         * Converts array into a JSON string and makes it readable for discord
+         * @param arr
+         * @returns {string}
+         */
+        function discordToString(arr) {
+            return '```JSON\n' + JSON.stringify(arr) + '```';
         }
 
     },
