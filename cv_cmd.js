@@ -1,22 +1,24 @@
 const request = require("request");
-const {StringStream} = require("scramjet");
+const {
+    StringStream
+} = require("scramjet");
 let recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv";
 let confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv";
 let deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv";
 
 let url;
 
-    // Check if args[0] is c, r or d, else apply c (default)
-    if (process.argv[2].length === 1) { // Its one of the 3 mentioned above
+// Check if args[0] is c, r or d, else apply c (default)
+if (process.argv[2].length === 1) { // Its one of the 3 mentioned above
 
-        if (process.argv[2] === 'd')
-            url = deaths;
-        else if (process.argv[2] === 'r')
-            url = recovered;
-        else
-            url = confirmed;
-    }else
-        url = confirmed; // Default case
+    if (process.argv[2] === 'd')
+        url = deaths;
+    else if (process.argv[2] === 'r')
+        url = recovered;
+    else
+        url = confirmed;
+} else
+    url = confirmed; // Default case
 
 
 let country = "";
@@ -25,7 +27,7 @@ if (process.argv[2] === 'c' || process.argv[2] === 'r' || process.argv[2] === 'd
         .replace(process.argv[0] + " ", "")
         .replace(process.argv[1] + " ", "")
         .replace(process.argv[2] + " ", "");
-}else { // Url is c by default, country begins from 0
+} else { // Url is c by default, country begins from 0
     country = country.concat(process.argv).replace(/,/g, " ")
         .replace(process.argv[0] + " ", "")
         .replace(process.argv[1] + " ", "");
@@ -34,7 +36,7 @@ if (process.argv[2] === 'c' || process.argv[2] === 'r' || process.argv[2] === 'd
 
 getData(url);
 
-function getData (source) {
+function getData(source) {
     let rows = [];
     request.get(source)
         .pipe(new StringStream())
@@ -43,26 +45,29 @@ function getData (source) {
         .then(() => {
             let arr = searchRow(rows, country);
 
-            for (let i = 0; i < arr.length; i++){
+            for (let i = 0; i < arr.length; i++) {
                 console.log(arr[i].date + ": " + arr[i].value)
             }
         });
 
 }
 
-function getRowData (format, arr) {
+function getRowData(format, arr) {
     let bruh = [];
-    for (let i = 4; i < format.length; i++){
+    for (let i = 4; i < format.length; i++) {
         if (arr[i] != 0) {
-            bruh.push({"date": format[i], "value": arr[i]});
+            bruh.push({
+                "date": format[i],
+                "value": arr[i]
+            });
         }
     }
     return bruh;
 }
 
 function searchRow(data, country) {
-    for (let i = 1; i < data.length; i++){
-        if (data[i][0].toLowerCase().includes(country.toLowerCase()) || data[i][1].toLowerCase().includes(country.toLowerCase())){// csv was inconsistent so had to check both
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][0].toLowerCase().includes(country.toLowerCase()) || data[i][1].toLowerCase().includes(country.toLowerCase())) { // csv was inconsistent so had to check both
             return getRowData(data[0], data[i]);
         }
     }
