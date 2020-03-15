@@ -132,6 +132,27 @@ module.exports = {
             return finalArray;
         }
 
+        function sumCases(arr, country) {
+            let first = true;
+            let initialRow = [];
+            let currentRow = [];
+
+            for (let i = 0; i < arr.length; i++){
+                if (arr[i][0].toLowerCase().includes(country.toLowerCase()) || arr[i][1].toLowerCase().includes(country.toLowerCase())) {
+
+                    if (first)
+                        initialRow = getRowData(arr[0], arr[i]);
+                    else {
+                        currentRow = getRowData(arr[0], arr[i]);
+
+                        for (let i2 = 0; i2 < initialRow.length; i2++)
+                            initialRow[i].value += currentRow[i].value;
+                    }
+                }
+            }
+            return initialRow;
+        }
+
     },
 };
 // TODO Line 83 causes the loop to break once one single region with 'china' in it is found, make it so it catches all regions and adds the values together
