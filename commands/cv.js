@@ -20,14 +20,14 @@ module.exports = {
                 url = recovered;
             else
                 url = confirmed;
-        }else
+        } else
             url = confirmed; // Default case
 
 
         let country = "";
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
             country = country.concat(args).replace(/,/g, " ").replace(args[0] + " ", "");
-        }else { // Country isn't polluted by a url modifier.
+        } else { // Country isn't polluted by a url modifier.
             country = country.concat(args).replace(/,/g, " ");
         }
 
@@ -38,17 +38,17 @@ module.exports = {
          * Parses url and prints the relevant filtered data (can be modified to return it instead which can be used for plotting later on).
          * @param source
          */
-        function getData (source) {
+        function getData(source) {
             let rows = [];
-                request.get(source) // Grabs data from the provided url
-                    .pipe(new StringStream()) // Pipes it into a string stream
-                    .CSVParse() // parses it (csv format)
-                    .consume(object => rows.push(object)) // pushes everything into rows[]
-                    .then(() => {
-                        let arr = searchRow(rows, country); // Generates the array we want
-                        let finalArray = filterCasesDupes(filterCasesEmpty(arr)); // Filters out dates with no case number difference and dates with 0 cases
-                        message.channel.send('```JSON\n' + JSON.stringify(finalArray) + '```') // Sends data on discord in the form of a json document
-                    });
+            request.get(source) // Grabs data from the provided url
+                .pipe(new StringStream()) // Pipes it into a string stream
+                .CSVParse() // parses it (csv format)
+                .consume(object => rows.push(object)) // pushes everything into rows[]
+                .then(() => {
+                    let arr = searchRow(rows, country); // Generates the array we want
+                    let finalArray = filterCasesDupes(filterCasesEmpty(arr)); // Filters out dates with no case number difference and dates with 0 cases
+                    message.channel.send('```JSON\n' + JSON.stringify(finalArray) + '```') // Sends data on discord in the form of a json document
+                });
 
         }
 
@@ -58,11 +58,14 @@ module.exports = {
          * @param index
          * @returns {[]}
          */
-        function getRowData (arr, index) {
+        function getRowData(arr, index) {
             let finalArray = [];
 
-            for (let i = 4; i < arr[0].length; i++){ // Dates start from index 4
-                finalArray.push({"date": arr[0][i], "value": parseInt(arr[index][i])});
+            for (let i = 4; i < arr[0].length; i++) { // Dates start from index 4
+                finalArray.push({
+                    "date": arr[0][i],
+                    "value": parseInt(arr[index][i])
+                });
             }
             return finalArray;
         }
@@ -76,55 +79,50 @@ module.exports = {
         function searchRow(data, country) {
             if (country === 'all') {
                 return sumCases(data, null, true)
-            }else if (country === 'other') {
+            } else if (country === 'other') {
                 return sumCases(data, null, false);
             } else {
                 return sumCases(data, country, true);
             }
         }
 
+        /**
+         * Returns the total amount of cases for a specific country or for all countries with or without china
+         * @param arr
+         * @param country
+         * @param includeChina
+         * @returns {[]}
+         */
         function sumCases(arr, country, includeChina) {
             let first = true;
             let initialRow = [];
             let currentRow = [];
 
-            for (let i = 0; i < arr.length; i++) {
-                if (country) {
+            for (let i = 0; i < arr.length; i++) { // Loops through the entire array
+                if (country) { // If a country is given
                     if (includesCountry(arr, i, country)) {
-                        if (first) {
+                        if (first) { // The first time this is ran (and hits) we want to update initialRow
                             initialRow = getRowData(arr, i);
                             first = false;
-                        }
-                        else {
+                        } else { // All other hits are added on top
                             currentRow = getRowData(arr, i);
-
-                            for (let i2 = 0; i2 < currentRow.length; i2++)
-                                initialRow[i2].value += currentRow[i2].value;
+                            initialRow = sumRows(initialRow, currentRow)
                         }
                     }
                 } else { // This is either all or other
                     if (includeChina) { // All
                         initialRow = getRowData(arr, i);
-
                         for (let i = 2; i < arr.length; i++) { // Start from index 2 since 0 is format and 1 is initialRow
                             currentRow = getRowData(arr, i);
-
-                            for (let i2 = 0; i2 < currentRow.length; i2++)
-                                initialRow[i2].value += currentRow[i2].value;
-
+                            initialRow = sumRows(initialRow, currentRow)
                         }
                     } else { // Other
                         initialRow = getRowData(arr, i);
-
                         for (let i = 2; i < arr.length; i++) { // Start from index 2 since 0 is format and 1 is initialRow
-
-                            if (!includesCountry(arr, i, 'china')) {
+                            if (!includesCountry(arr, i, 'china')) { // China must not be included in the row
                                 currentRow = getRowData(arr, i);
-
-                                for (let i2 = 0; i2 < currentRow.length; i2++)
-                                    initialRow[i2].value += currentRow[i2].value;
+                                initialRow = sumRows(initialRow, currentRow);
                             }
-
                         }
                     }
                 }
@@ -132,6 +130,13 @@ module.exports = {
             return initialRow;
         }
 
+        /**
+         * Returns true if the passed country is the country of the passed row
+         * @param arr
+         * @param index
+         * @param country
+         * @returns {boolean}
+         */
         function includesCountry(arr, index, country) {
             let check = "";
             if (arr[index][0])
@@ -166,14 +171,22 @@ module.exports = {
             let finalArray = [];
 
             for (let i = 0; i < arr.length; i++)
-                if (i > 0 && arr[i].value !== arr[i-1].value)
+                if (i > 0 && arr[i].value !== arr[i - 1].value)
                     finalArray.push(arr[i]);
 
             return finalArray;
         }
+
+        /**
+         * Sums the values of 2 rows
+         * @param row1
+         * @param row2
+         * @returns {*}
+         */
+        function sumRows(row1, row2) {
+            for (let i = 0; i < row1.length; i++)
+                row1[i].value += row2[i].value;
+            return row1;
+        }
     },
 };
-// TODO Line 83 causes the loop to break once one single region with 'china' in it is found, make it so it catches all regions and adds the values together
-
-// TODO Consider making a function that returns an array with the summed cases of all countries that include the given name. put that in the searchRow
-//  other and all cases as well as in the default case (so china works)
