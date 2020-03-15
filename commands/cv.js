@@ -131,6 +131,18 @@ module.exports = {
         }
 
         /**
+         * Sums the values of 2 rows
+         * @param row1
+         * @param row2
+         * @returns {*}
+         */
+        function sumRows(row1, row2) {
+            for (let i = 0; i < row1.length; i++)
+                row1[i].value += row2[i].value;
+            return row1;
+        }
+        
+        /**
          * Returns true if the passed country is the country of the passed row
          * @param arr
          * @param index
@@ -177,16 +189,5 @@ module.exports = {
             return finalArray;
         }
 
-        /**
-         * Sums the values of 2 rows
-         * @param row1
-         * @param row2
-         * @returns {*}
-         */
-        function sumRows(row1, row2) {
-            for (let i = 0; i < row1.length; i++)
-                row1[i].value += row2[i].value;
-            return row1;
-        }
     },
 };
