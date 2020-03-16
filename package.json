@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "node /regressionTest/index.js",
+    "test": "node cv_cmd.js",
     "cv": "node cv_cmd.js"
   },
   "author": "",
