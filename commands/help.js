@@ -1,6 +1,6 @@
 module.exports = {
     name: "help",
-    description: "help",
+    description: "Shows information on commands",
     usage: "``.help``",
     execute(message, args, client) {
         const Discord = require('discord.js');
