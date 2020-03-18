@@ -6,8 +6,10 @@ const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 
 module.exports = {
     name: 'cv',
-    description: 'cv!',
-    execute(message, args) {
+    description: 'Displays number of confirmed/deaths/recovered cases of covid-19 on specific countries.',
+    usage: '``.cv [c/r/d] [country]``\nIf the first argument is left out, c is being selected by default. Instead of a specific ' +
+        'country the bot supports ``all`` for all countries and ``other`` for all countries other than china',
+    execute(message, args, client) {
 
         let url;
 
