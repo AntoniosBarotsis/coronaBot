@@ -1,5 +1,6 @@
 const {StringStream} = require("scramjet");
 const request = require("request");
+const tf = require("@tensorflow/tfjs");
 const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv";
 const confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv";
 const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv";
@@ -24,7 +25,6 @@ module.exports = {
                 url = confirmed;
         } else
             url = confirmed; // Default case
-
 
         let country = "";
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
@@ -197,6 +197,7 @@ module.exports = {
         function discordToString(arr) {
             return '```JSON\n' + JSON.stringify(arr) + '```';
         }
+
 
     },
 };
