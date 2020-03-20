@@ -2,7 +2,7 @@ const plotly = require('plotly')('Tony_','U0TugGb9QBf7IozlI4Wd');
 const fs = require('fs');
 
 module.exports = {
-    name: 'test',
+    name: 'testGraph',
     description: 'Testing stuff',
     usage: "``.test``",
     execute(message, args, client) {
