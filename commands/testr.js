@@ -1,4 +1,4 @@
-const tf = require("@tensorflow/tfjs");
+const PolynomialRegression = require("ml-regression-polynomial");
 
 module.exports = {
     name: 'testr',
@@ -6,60 +6,21 @@ module.exports = {
     usage: "``.testr``",
     execute(message, args, client) {
 
-        let x_vals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        let x_vals2 = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-        let y_vals = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20];
+        // import ExponentialRegression from 'ml-regression-exponential';
 
-        let m, b;
+        let valuesY = [0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,20,62,155,229,322,453,655,888,1128,1694,2036,
+            2502,3089,3858,4636,5883,7375,9172,10149,12462,12462,17660,21157,24747,27980,31506,35713,41035];
 
-        const learningRate = 0.01;
-        const optimizer = tf.train.sgd(learningRate);
+        let valuesX = [];
+        for (let i = 0; i < 58; i++)
+            valuesX.push(i);
 
-        m = tf.variable(tf.scalar(Math.random()));
-        b = tf.variable(tf.scalar(Math.random()));
+        const degree = 5;
 
-        function predict(x) {
-            // Turn array into a tensor
-            const xs = tf.tensor1d(x);
-            return xs.mul(m).add(b);
-        }
-
-        function loss(pred, label) {
-            // pred is the ys from the predict func, label is the actual y
-            return pred.sub(label).square().mean();
-        }
-
-        function train() {
-            if (x_vals.length > 0) {
-                const ys = tf.tensor1d(y_vals);
-                optimizer.minimize(() => loss(predict(x_vals), ys))
-            }
-        }
+        const regression = new PolynomialRegression(valuesX, valuesY, degree);
 
 
-        // console.log(tf.tensor1d(y_vals).print());
-        // predict(x_vals).print();
-
-        tf.tidy(() => {
-            for (let i = 0; i < 1000; i++) {
-                let temp = [];
-                train();
-                predict(x_vals).dataSync().forEach(e => temp.push(Math.round(e)));
-            }
-        });
-
-        let results2 = [];
-        let results3 = [];
-        tf.tidy(() => {
-            predict(x_vals).dataSync().forEach(e => results2.push(Math.round(e)));
-            predict(x_vals2).dataSync().forEach(e => results3.push(Math.round(e)));
-        });
-
-        let str = '';
-        str +=`Given xs: ${x_vals.toString()}\n`;
-        str +=`Given ys: ${y_vals.toString()}\n`;
-        str += `Ys on same x input: ${results2.toString()}\n`;
-        message.channel.send(str + `Ys on new x input: ${results3.toString()}\n` + `Uncleaned tensors: ${tf.memory().numTensors}`);
-
+        message.channel.send(Math.round(regression._predict(58)));
+        message.channel.send(Math.round(regression._predict(59)));
     },
 };
