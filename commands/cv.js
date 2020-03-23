@@ -53,7 +53,7 @@ module.exports = {
                 .consume(object => rows.push(object)) // pushes everything into rows[]
                 .then(() => {
                     let arr = searchRow(rows, country); // Generates the array we want
-                    let finalArray = formatForGraph(filterCasesDupes(filterCasesEmpty(arr))); // Filters out dates with no case number difference and dates with 0 cases
+                    let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out dates with no case number difference and dates with 0 cases
                     // message.channel.send(discordToString(finalArray)); // Sends data on discord in the form of a json document
                     generateGraph(finalArray);
                 });
@@ -191,6 +191,16 @@ module.exports = {
 
             for (let i = 0; i < arr.length; i++)
                 if (i > 0 && arr[i].value !== arr[i - 1].value)
+                    finalArray.push(arr[i]);
+
+            return finalArray;
+        }
+
+        function filterCasesDecreasing(arr) {
+            let finalArray = [];
+
+            for (let i = 0; i < arr.length; i++)
+                if (i > 0 && arr[i].value > arr[i-1].value)
                     finalArray.push(arr[i]);
 
             return finalArray;
