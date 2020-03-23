@@ -1,4 +1,6 @@
-const plotly = require('plotly')('Tony_','U0TugGb9QBf7IozlI4Wd');
+const username = process.env.name;
+const apikey = process.env.apikey;
+const plotly = require('plotly')(username, apikey);
 const fs = require('fs');
 
 module.exports = {
@@ -26,22 +28,34 @@ module.exports = {
                 valuesFinal.push(values[i])
             }
         }
-
-        // let arr = dates[0].split('/');
-        // console.log(arr.toString());
-        // console.log(`${arr[2]}-${arr[0]}-${arr[1]}`);
-        // console.log(datesFinal.toString());
-
         message.channel.startTyping();
         let trace1 = {
             x: datesFinal,
             y: valuesFinal,
+            fill: 'tonexty',
             type: "scatter",
             name: "Confirmed cases (Italy)",
             line: {
-                color:"rgba(31, 119, 180, 1)"
+                color:"rgba(31, 119, 180, 1)"// blue
+                // color:"rgba(206, 28, 28, 1)"// red
+                // color:"rgba(36, 221, 23, 1)"// green
+                // color:"rgba(82, 75, 75, 1)"// grey
             },
         };
+        //
+        // let trace2 = {
+        //     x: datesFinal,
+        //     y: values2,
+        //     fill: 'tozeroy',
+        //     type: "scatter",
+        //     name: "Confirmed cases (Italy)/2",
+        //     line: {
+        //         // color:"rgba(31, 119, 180, 1)"
+        //         color:"rgba(206, 28, 28, 1)"
+        //         // color:"rgba(36, 221, 23, 1)"
+        //         // color:"rgba(82, 75, 75, 1)"
+        //     },
+        // };
 
         let figure = { 'data': [trace1] };
 
@@ -59,7 +73,7 @@ module.exports = {
 
             setTimeout(() => {
                 message.channel.send({files: ['1.png']}).then(message.channel.stopTyping())
-            }, 1000)
+            }, 300)
         });
 
     }
