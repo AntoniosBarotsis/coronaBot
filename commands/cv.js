@@ -1,5 +1,9 @@
 const {StringStream} = require("scramjet");
 const request = require("request");
+const username = process.env.name;
+const apikey = process.env.apikey;
+const plotly = require('plotly')(username, apikey);
+const fs = require('fs');
 const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv";
 const confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv";
 const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv";
@@ -7,7 +11,7 @@ const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 module.exports = {
     name: 'cv',
     description: 'cv!',
-    execute(message, args) {
+    execute(message, args, client) {
 
         let url;
 
@@ -45,8 +49,9 @@ module.exports = {
                 .consume(object => rows.push(object)) // pushes everything into rows[]
                 .then(() => {
                     let arr = searchRow(rows, country); // Generates the array we want
-                    let finalArray = discordToString(filterCasesDupes(filterCasesEmpty(arr))); // Filters out dates with no case number difference and dates with 0 cases
-                    message.channel.send(finalArray) // Sends data on discord in the form of a json document
+                    let finalArray = formatForGraph(filterCasesDupes(filterCasesEmpty(arr))); // Filters out dates with no case number difference and dates with 0 cases
+                    // message.channel.send(discordToString(finalArray)); // Sends data on discord in the form of a json document
+                    generateGraph(finalArray);
                 });
         }
 
@@ -196,5 +201,101 @@ module.exports = {
             return '```JSON\n' + JSON.stringify(arr) + '```';
         }
 
+        /**
+         * Formats the date appropriately for plotly
+         * @param arr
+         * @returns {[]}
+         */
+        function formatForGraph(arr) {
+            let arrFinal = [];
+
+            for (let i = 0; i < arr.length; i++) {
+                let temp = arr[i].date.split('/');
+                arrFinal.push({
+                    'date': `${temp[2]}-${temp[0]}-${temp[1]}`,
+                    'value': arr[i].value
+                });
+            }
+            return arrFinal;
+        }
+
+        /**
+         * Generates a graph from the given data, exports it as a png file and sends it
+         * @param arr
+         */
+        function generateGraph(arr) {
+
+            message.channel.startTyping();
+
+            let dates = [];
+            let values = [];
+
+            for (let i = 0; i < arr.length; i++) {
+                dates.push(arr[i].date);
+                values.push(arr[i].value);
+            }
+
+            let trace = {
+                x: dates,
+                y: values,
+                fill: 'tonexty',
+                type: "scatter",
+                name: setName(args[0]),
+                line: {
+                    color:setColor(args[0])
+                },
+            };
+
+            let figure = { 'data': [trace] };
+
+            let imgOpts = {
+                format: 'jpeg',
+                width: 1000,
+                height: 500,
+            };
+
+            plotly.getImage(figure, imgOpts, function (error, imageStream) {
+                if (error) return console.log (error);
+
+                let fileStream = fs.createWriteStream('1.jpeg');
+                imageStream.pipe(fileStream);
+
+                setTimeout(() => {
+                    message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping())
+                }, 100)
+            });
+        }
+
+        /**
+         * Used to generate the curve color based on whether confirmed, deaths or recovered were queried.
+         * @param str
+         * @returns {string}
+         */
+        function setColor(str) {
+            let color = '';
+
+            if (str === 'd')
+                color = "rgba(82, 75, 75, 1)";
+            else if (str === 'r')
+                color = "rgba(36, 221, 23, 1)";
+            else
+                color = "rgba(31, 119, 180, 1)";
+
+            return color;
+        }
+
+        /**
+         * Generates a curve name. Only visible once you start displaying 2 curves in the same graph.
+         * @param str
+         */
+        function setName(str) {
+            let txt = '';
+            if (str === 'd')
+                txt = `Deaths (${country})`;
+            else if (str === 'r')
+                txt = `Recovered (${country})`;
+            else
+                txt = `Confirmed cases (${country})`;
+        }
     },
 };
