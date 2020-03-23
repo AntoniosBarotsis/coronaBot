@@ -209,7 +209,7 @@ module.exports = {
             for (let i = 0; i < arr.length; i++)
                 if (i === 0)
                     finalArray.push(arr[i]);
-                else if (arr[i].value > arr[i-1].value)
+                else if (arr[i].value >= arr[i-1].value)
                     finalArray.push(arr[i]);
 
             return finalArray;
