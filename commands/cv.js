@@ -163,7 +163,7 @@ module.exports = {
             if (arr[index][1])
                 check += arr[index][1].toLowerCase() + " ";
 
-            return check.includes(country);
+            return check.match(`\\b${country}\\b`);
         }
 
         /**

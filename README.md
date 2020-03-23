@@ -11,7 +11,9 @@ A simple discord bot that can query data about confirmed, death and recovered ca
 
 ## Installation
 
-Download the repository and add a .env file in root containing your token as well as your preferred prefix. If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv_cmd`` in the root directory.
+You have to make a [Plot.ly](https://chart-studio.plot.ly/feed/#/) account and copy your Api key.
+Download the repository and add a .env file in root containing your bot token, your preferred prefix and your Plotly username and api key.
+If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv_cmd`` in the root directory.
 
 ## Usage
 
