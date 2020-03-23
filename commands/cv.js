@@ -53,7 +53,7 @@ module.exports = {
                 .consume(object => rows.push(object)) // pushes everything into rows[]
                 .then(() => {
                     let arr = searchRow(rows, country); // Generates the array we want
-                    let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out dates with no case number difference and dates with 0 cases
+                    let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
                     // message.channel.send(discordToString(finalArray)); // Sends data on discord in the form of a json document
                     generateGraph(finalArray);
                 });
@@ -283,9 +283,7 @@ module.exports = {
                 let fileStream = fs.createWriteStream('1.jpeg');
                 imageStream.pipe(fileStream);
 
-                setTimeout(() => {
-                    message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping())
-                }, 150)
+                fileStream.on('finish', () => message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping()));
             });
         }
 
