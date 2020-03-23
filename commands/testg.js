@@ -6,8 +6,9 @@ const fs = require('fs');
 module.exports = {
     name: 'testg',
     description: 'Testing stuff',
-    usage: "``.test``",
-    execute(message, args, client) {
+    usage: "testg",
+    show: false,
+    execute(message, args) {
 
         let dates = ['1/22/20','1/23/20','1/24/20','1/25/20','1/26/20','1/27/20','1/28/20','1/29/20','1/30/20','1/31/20',
             '2/1/20','2/2/20','2/3/20','2/4/20','2/5/20','2/6/20','2/7/20','2/8/20','2/9/20','2/10/20','2/11/20','2/12/20',

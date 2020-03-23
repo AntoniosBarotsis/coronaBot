@@ -2,6 +2,7 @@ const {StringStream} = require("scramjet");
 const request = require("request");
 const username = process.env.name;
 const apikey = process.env.apikey;
+const prefix = process.env.prefix;
 const plotly = require('plotly')(username, apikey);
 const fs = require('fs');
 const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv";
@@ -10,8 +11,11 @@ const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 
 module.exports = {
     name: 'cv',
-    description: 'cv!',
-    execute(message, args, client) {
+    description: 'Displays number of confirmed/deaths/recovered cases of covid-19 on specific countries.',
+    usage: '``' + prefix + 'cv [c/r/d] [country]``\nIf the first argument is left out, c is being selected by default. Instead of a specific ' +
+        'country the bot supports ``all`` for all countries and ``other`` for all countries other than china.',
+    show: true,
+    execute(message, args) {
 
         let url;
 
