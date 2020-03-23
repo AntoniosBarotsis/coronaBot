@@ -190,12 +190,19 @@ module.exports = {
             let finalArray = [];
 
             for (let i = 0; i < arr.length; i++)
-                if (i > 0 && arr[i].value !== arr[i - 1].value)
+                if (i === 0)
+                    finalArray.push(arr[i]);
+                else if (arr[i].value !== arr[i - 1].value)
                     finalArray.push(arr[i]);
 
             return finalArray;
         }
 
+        /**
+         * In some cases the CSV file would decrease cases moving onwards which is impossible and quite possible an error, fixing it here
+         * @param arr
+         * @returns {[]}
+         */
         function filterCasesDecreasing(arr) {
             let finalArray = [];
 
