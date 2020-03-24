@@ -31,7 +31,6 @@ module.exports = {
         } else
             url = confirmed; // Default case
 
-
         let country = "";
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
             country = country.concat(args).replace(/,/g, " ").replace(args[0] + " ", "");
