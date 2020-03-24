@@ -4,7 +4,7 @@ module.exports = {
     name: 'testr',
     description: 'Testing stuff',
     usage: "``.testr``",
-    show: "false",
+    show: false,
     execute(message, args, client) {
 
         // import ExponentialRegression from 'ml-regression-exponential';
