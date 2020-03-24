@@ -17,7 +17,7 @@ This bot unfortunately one day stop working. To this day I am unsure as to why t
 obviously halted until further notice and as a result various of its components remain unfinished (the command line part for example). Although I will probably never get to finish this project
 it has most certainly been my most interesting one so far and I discovered how much I love data science because of it. That said, I'm still willing to make this public since I believe that there
 are a couple of good ideas here and there that people might find useful. Hope you enjoy this as much as I did :). I'll keep an eye out in case anyone manages to fix this though that would be neat!
-Rest of readme is a bit outdated but oh well, I feel like keeping it that way.
+Rest of readme is a bit outdated but oh well, I feel like keeping it that way. I'm also gonna leave my [project](https://github.com/AntoniosBarotsis/coronaBot/projects/1) public in case anyone wants to take a peek at what the bot would eventually become.
 
 ## Installation
 
