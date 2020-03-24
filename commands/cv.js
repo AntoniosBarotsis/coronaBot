@@ -5,6 +5,7 @@ const apikey = process.env.apikey;
 const prefix = process.env.prefix;
 const plotly = require('plotly')(username, apikey);
 const fs = require('fs');
+const population = require('./../data/population');
 const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv";
 const confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv";
 const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv";
@@ -19,8 +20,8 @@ module.exports = {
 
         let url;
 
-        // Check if args[0] is r or d, else apply c (default)
-        if (args[0].length === 1) { // Its one of the 3 mentioned above
+        // Check if args[0] is r or d, else apply c (default).
+        if (args[0].length === 1) { // Its one of the 3 mentioned above.
 
             if (args[0] === 'd')
                 url = deaths;
@@ -38,28 +39,38 @@ module.exports = {
             country = country.concat(args).replace(/,/g, " ");
         }
 
-        getData(url);
+        let toPopulation = false;
+
+        if (country.includes('pop')) {
+            toPopulation = true;
+            country = country.replace(' pop', '');
+        }
+
+        getData(url).then(arr => {
+            console.log(`${arr[arr.length-1].value}`);
+        });
 
         /**
-         * Parses url and prints the relevant filtered data
+         * Parses url and prints the relevant filtered data.
          * @param source
          */
         function getData(source) {
             let rows = [];
-            request.get(source) // Grabs data from the provided url
-                .pipe(new StringStream()) // Pipes it into a string stream
-                .CSVParse() // parses it (csv format)
-                .consume(object => rows.push(object)) // pushes everything into rows[]
-                .then(() => {
-                    let arr = searchRow(rows, country); // Generates the array we want
-                    let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
-                    // message.channel.send(discordToString(finalArray)); // Sends data on discord in the form of a json document
-                    generateGraph(finalArray);
-                });
+            return new Promise(async function (resolve, reject) {
+                request.get(source) // Grabs data from the provided url
+                    .pipe(new StringStream()) // Pipes it into a string stream
+                    .CSVParse() // parses it (csv format)
+                    .consume(object => rows.push(object)) // pushes everything into rows[]
+                    .then(() => {
+                        let arr = searchRow(rows, country); // Generates the array we want
+                        let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
+                        resolve (finalArray);
+                    })
+            })
         }
 
         /**
-         * Returns all dates along with the cases recorded for the said date as an array of objects
+         * Returns all dates along with the cases recorded for the said date as an array of objects.
          * @param arr
          * @param index
          * @returns {[]}
@@ -93,7 +104,7 @@ module.exports = {
         }
 
         /**
-         * Returns the total amount of cases for a specific country or for all countries with or without china
+         * Returns the total amount of cases for a specific country or for all countries with or without china.
          * @param arr
          * @param country
          * @param includeChina
@@ -137,7 +148,7 @@ module.exports = {
         }
 
         /**
-         * Sums the values of 2 rows
+         * Sums the values of 2 rows.
          * @param row1
          * @param row2
          * @returns {*}
@@ -149,7 +160,7 @@ module.exports = {
         }
 
         /**
-         * Returns true if the passed country is the country of the passed row
+         * Returns true if the passed country is the country of the passed row (uses regex to make sure Australia doesnt get matched if the user inputs us for example).
          * @param arr
          * @param index
          * @param country
@@ -166,7 +177,7 @@ module.exports = {
         }
 
         /**
-         * Filters out days that have 0 cases (preference)
+         * Filters out days that have 0 cases.
          * @param arr
          * @returns {[]}
          */
@@ -181,7 +192,7 @@ module.exports = {
         }
 
         /**
-         * Filters out days that have the same amount of cases (preference)
+         * Filters out days that have the same amount of cases (keeps the first one).
          * @param arr
          * @returns {[]}
          */
@@ -198,7 +209,7 @@ module.exports = {
         }
 
         /**
-         * In some cases the CSV file would decrease cases moving onwards which is impossible and quite possible an error, fixing it here
+         * In some cases the CSV file would decrease cases moving onwards which is impossible and quite possible an error, fixing it here.
          * @param arr
          * @returns {[]}
          */
@@ -215,7 +226,7 @@ module.exports = {
         }
 
         /**
-         * Converts array into a JSON string and makes it readable for discord
+         * Converts array into a JSON string and makes it readable for discord.
          * @param arr
          * @returns {string}
          */
@@ -224,7 +235,7 @@ module.exports = {
         }
 
         /**
-         * Formats the date appropriately for plotly
+         * Formats the date appropriately for plot.ly.
          * @param arr
          * @returns {[]}
          */
@@ -242,7 +253,7 @@ module.exports = {
         }
 
         /**
-         * Generates a graph from the given data, exports it as a png file and sends it
+         * Generates a graph from the given data, exports it as a jpeg file and sends it.
          * @param arr
          */
         function generateGraph(arr) {
@@ -316,6 +327,29 @@ module.exports = {
                 txt = `Recovered (${country})`;
             else
                 txt = `Confirmed cases (${country})`;
+        }
+
+        function getPopulation(country) {
+            let num = 0;
+            for (let i in population) {
+                if (population[i].country.toLowerCase() === 'greece')
+                    num = population[i].population;
+            }
+            return num;
+        }
+
+        /**
+         *
+         * @param country
+         * @param arr
+         */
+        function populationData(country, arrC) {
+            let msg = '';
+            let pop = getPopulation(country);
+            let confirmedOverPop = (100*arrC[arrC.length - 1].value/pop).toFixed(2);
+
+            msg += `Percentage of the population that has been infected: ${confirmedOverPop}%`;
+            return msg;
         }
     },
 };
