@@ -4,20 +4,10 @@ A simple discord bot that can query data about confirmed, death and recovered ca
 
 ## Table of Contents
 
-- [What happened](#WhatHappened)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Support](#support)
 - [Contributing](#contributing)
-
-## WhatHappened
-
-This bot unfortunately one day stop working. To this day I am unsure as to why that is although I do believe that it has something to do with the CSV parsing part of the code (it appears as if
-[this](https://github.com/AntoniosBarotsis/coronaBot/blob/3a46332fef27258d70c9a0b97c610dc25a87733d/commands/cv.js#L64-L68) part of the code never executes). Further development of the bot is 
-obviously halted until further notice and as a result various of its components remain unfinished (the command line part for example). Although I will probably never get to finish this project
-it has most certainly been my most interesting one so far and I discovered how much I love data science because of it. That said, I'm still willing to make this public since I believe that there
-are a couple of good ideas here and there that people might find useful. Hope you enjoy this as much as I did :). I'll keep an eye out in case anyone manages to fix this though that would be neat!
-Rest of readme is a bit outdated but oh well, I feel like keeping it that way. I'm also gonna leave my [project](https://github.com/AntoniosBarotsis/coronaBot/projects/1) public in case anyone wants to take a peek at what the bot would eventually become.
 
 ## Installation
 
