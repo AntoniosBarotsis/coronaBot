@@ -1,5 +1,6 @@
 const {StringStream} = require("scramjet");
 const request = require("request");
+const axios = require('axios')
 const username = process.env.name;
 const apikey = process.env.apikey;
 const prefix = process.env.prefix;
@@ -48,6 +49,7 @@ module.exports = {
 
         getData(url).then(arr => {
             console.log(`${arr[arr.length-1].value}`);
+            generateGraph(arr)
         });
 
         /**
@@ -268,33 +270,44 @@ module.exports = {
                 values.push(arr[i].value);
             }
 
-            let trace = {
-                x: dates,
-                y: values,
-                fill: 'tonexty',
-                type: "scatter",
-                name: setName(args[0]),
-                line: {
-                    color:setColor(args[0])
-                },
-            };
+            let chartData = {
+              'backgroundColor': 'white',
+              'width': 1000,
+              'height': 500,
+              'format': 'jpg',
+              'chart': {
+                'type': 'line',
+                'data': {
+                  'labels': dates,
+                  'datasets': [{
+                    'label': 'Number',
+                    'data': values,
+                    'fill': true,
+                  }]
+                }
+              },
+            }
 
-            let figure = { 'data': [trace] };
-
-            let imgOpts = {
-                format: 'jpeg',
-                width: 1000,
-                height: 500,
-            };
-
-            plotly.getImage(figure, imgOpts, function (error, imageStream) {
-                if (error) return console.log (error);
-
-                let fileStream = fs.createWriteStream('1.jpeg');
-                imageStream.pipe(fileStream);
-
-                fileStream.on('finish', () => message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping()));
-            });
+            //post req. with params to create our chrat
+            axios({
+              method: 'post',
+              url: 'https://quickchart.io/chart',
+              responseType: 'stream',
+              data: chartData,
+            })
+              .then((res) => {
+                //pipe image into writestream and send image when done
+                res.data.pipe(fs.createWriteStream('1.jpeg'))
+                .on('finish', () => {
+                  message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping())
+                })
+                .on('error', () => {
+                  //if can't convert to pic, do error func here
+                })
+              })
+              .catch((err) => {
+                //if can't get web chart, do error func here
+              })
         }
 
         /**
