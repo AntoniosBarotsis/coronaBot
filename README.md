@@ -21,8 +21,7 @@ Rest of readme is a bit outdated but oh well, I feel like keeping it that way. I
 
 ## Installation
 
-You have to make a [Plot.ly](https://chart-studio.plot.ly/feed/#/) account and copy your Api key.
-Download the repository and add a .env file in root containing your bot token, your preferred prefix and your Plotly username and api key.
+Download the repository and add your bot token and your preferred prefix in the .env file present in root.
 If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv_cmd`` in the root directory.
 
 ## Usage
