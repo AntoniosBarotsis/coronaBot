@@ -271,7 +271,7 @@ module.exports = {
             }
 
             let chartData = {
-              'backgroundColor': 'white',
+              'backgroundColor': 'transparent',
               'width': 1000,
               'height': 500,
               'format': 'jpg',
@@ -286,7 +286,7 @@ module.exports = {
                   }]
                 }
               },
-            }
+            };
 
             //post req. with params to create our chrat
             axios({
