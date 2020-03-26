@@ -7,9 +7,9 @@ const prefix = process.env.prefix;
 const plotly = require('plotly')(username, apikey);
 const fs = require('fs');
 const population = require('./../data/population');
-const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv";
-const confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv";
-const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv";
+const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv";
+const confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
+const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 
 module.exports = {
     name: 'cv',
@@ -67,7 +67,7 @@ module.exports = {
                         let arr = searchRow(rows, country); // Generates the array we want
                         let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
                         resolve (finalArray);
-                    })
+                    }).catch(error => {console.error(error);})
             })
         }
 
