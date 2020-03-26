@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js --ignore /data/log.json",
+    "start": "node app.js",
     "test": "node cv_cmd.js",
     "cv": "node cv_cmd.js"
   },
