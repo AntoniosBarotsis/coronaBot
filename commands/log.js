@@ -4,9 +4,7 @@ const fs = require('fs');
 module.exports = {
     name: 'log',
     description: 'Logs your message which will later be viewed by me 0_0 so ples post many epic feedback ok thanks bye. Do ``.help log``',
-    usage: 'Jabaited no usage its just .log lmao so basically just check how .testg looks like and see previous pics. Im trynna figure out what' +
-        'the colors should look like so use .log to lmk how the ones ive shown so far look like and if u have any suggestions (remember we want confirmed cases' +
-        'deaths and recoveries so mention which one u are referring to thank)',
+    usage: 'What I want feedback on: So .cv should be working now. If you find countries that should work but dont (for example usa or vatican didnt work) make sure to .log them so I can fix them later.',
     show: true,
     execute(message, args) {
 
