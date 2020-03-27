@@ -19,37 +19,40 @@ module.exports = {
     show: true,
     execute(message, args) {
 
-        let url;
+        let flag;
 
         // Check if args[0] is r or d, else apply c (default).
-        if (args[0].length === 1) { // Its one of the 3 mentioned above.
-
-            if (args[0] === 'd')
-                url = deaths;
-            else if (args[0] === 'r')
-                url = recovered;
-            else
-                url = confirmed;
-        } else
-            url = confirmed; // Default case
+        if (args[0].length === 1) // Its one of the 3 mentioned above.
+            flag = args[0];
+        else
+            flag = 'c'; // Default case
 
         let country = "";
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-            country = country.concat(args).replace(/,/g, " ").replace(args[0] + " ", "");
+            country = replaceKnownCountry(country.concat(args).replace(/,/g, " ").replace(args[0] + " ", ""));
         } else { // Country isn't polluted by a url modifier.
-            country = country.concat(args).replace(/,/g, " ");
+            country = replaceKnownCountry(country.concat(args).replace(/,/g, " "));
         }
 
-        let toPopulation = false;
+        // if (country.includes('pop')) {
+        //     toPopulation = true;
+        //     country = country.replace(' pop', '');
+        // }
 
-        if (country.includes('pop')) {
-            toPopulation = true;
-            country = country.replace(' pop', '');
-        }
+        // Handle some cases like these here
 
-        getData(url).then(arr => {
-            console.log(`${arr[arr.length-1].value}`);
-            generateGraph(arr)
+        let urlData = [];
+
+        // This part checks the first flag and adds the relevant data to urlData. Eventually there will be a second part like this that will add data for the second country.
+        if (flag === 'c')
+            urlData.push(getData(confirmed));
+        else if (flag === 'd')
+            urlData.push(getData(deaths));
+        else
+            urlData.push(getData(recovered));
+
+        Promise.all(urlData).then(arr => {
+            generateGraph(arr[0]);
         });
 
         /**
@@ -259,8 +262,8 @@ module.exports = {
          * @param arr
          */
         function generateGraph(arr) {
-
             message.channel.startTyping();
+
 
             let dates = [];
             let values = [];
@@ -270,25 +273,40 @@ module.exports = {
                 values.push(arr[i].value);
             }
 
+            if (values.length === 0) {
+                message.channel.send('There seems to be no data available for your query, please try again!\n\nIf your spelling is correct be sure to mention that using' +
+                    '``.log [country to fix]`` so I fix it later.');
+                message.channel.stopTyping();
+                return;
+            }
+
             let chartData = {
-              'backgroundColor': 'transparent',
-              'width': 1000,
-              'height': 500,
-              'format': 'jpg',
-              'chart': {
-                'type': 'line',
-                'data': {
-                  'labels': dates,
-                  'datasets': [{
-                    'label': 'Number',
-                    'data': values,
-                    'fill': true,
-                  }]
-                }
-              },
+                backgroundColor: 'rgba(44,47,51, 1)',
+                width: 1000,
+                height: 500,
+                format: 'jpg',
+                chart: {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: getGraphLabel(),
+                            data: values,
+                            fill: true,
+                            backgroundColor: getGraphColor()
+                        }]
+                    },
+                    options: {
+                        legend: {
+                            labels: {
+                                fontColor: 'white'
+                            }
+                        }
+                    }
+                },
             };
 
-            //post req. with params to create our chrat
+            //post req. with params to create our chart
             axios({
               method: 'post',
               url: 'https://quickchart.io/chart',
@@ -301,45 +319,10 @@ module.exports = {
                 .on('finish', () => {
                   message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping())
                 })
-                .on('error', () => {
-                  //if can't convert to pic, do error func here
-                })
               })
               .catch((err) => {
-                //if can't get web chart, do error func here
+                console.error(err);
               })
-        }
-
-        /**
-         * Used to generate the curve color based on whether confirmed, deaths or recovered were queried.
-         * @param str
-         * @returns {string}
-         */
-        function setColor(str) {
-            let color = '';
-
-            if (str === 'd')
-                color = "rgba(82, 75, 75, 1)";
-            else if (str === 'r')
-                color = "rgba(36, 221, 23, 1)";
-            else
-                color = "rgba(31, 119, 180, 1)";
-
-            return color;
-        }
-
-        /**
-         * Generates a curve name. Only visible once you start displaying 2 curves in the same graph.
-         * @param str
-         */
-        function setName(str) {
-            let txt = '';
-            if (str === 'd')
-                txt = `Deaths (${country})`;
-            else if (str === 'r')
-                txt = `Recovered (${country})`;
-            else
-                txt = `Confirmed cases (${country})`;
         }
 
         function getPopulation(country) {
@@ -354,7 +337,7 @@ module.exports = {
         /**
          *
          * @param country
-         * @param arr
+         * @param arrC
          */
         function populationData(country, arrC) {
             let msg = '';
@@ -363,6 +346,53 @@ module.exports = {
 
             msg += `Percentage of the population that has been infected: ${confirmedOverPop}%`;
             return msg;
+        }
+
+        /**
+         * Returns the color that corresponds to the given flag
+         * @returns {string}
+         */
+        function getGraphColor() {
+            if (flag === 'r')
+                return 'rgba(0,200,83, 1)';
+            else if (flag === 'd')
+                return 'rgba(235,40,40, 1)';
+            else
+                return 'rgba(41, 121, 255, 1)'
+        }
+
+        /**
+         * Returns the label that corresponds to the given flag
+         * @returns {string}
+         */
+        function getGraphLabel() {
+            let actualCountry = country.charAt(0).toUpperCase() + country.slice(1);
+
+            if (country === 'all')
+                actualCountry = 'all countries';
+            else if (country === 'other')
+                actualCountry = 'all countries except China';
+
+            if (flag === 'r')
+                return `Recovered cases in ${actualCountry}`;
+            else if (flag === 'd')
+                return `Deaths in ${actualCountry}`;
+            else
+                return `Confirmed cases in ${actualCountry}`
+        }
+
+        /**
+         * You can now refer to usa as usa instead of us amazing
+         * @param knownCountry
+         * @returns {string|*}
+         */
+        function replaceKnownCountry(knownCountry) {
+            if (knownCountry.toLowerCase() === 'vatican')
+                return 'holy see';
+            else if (knownCountry.toLowerCase() === 'usa')
+                return 'US';
+            else
+                return knownCountry;
         }
     },
 };
