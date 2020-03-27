@@ -32,6 +32,8 @@ module.exports = {
                 };
             }
 
+            message.channel.send('Message logged thanks :)');
+
             fs.writeFile('data/log.json', JSON.stringify(currentData), (err) => {
                 console.error(err)
             });

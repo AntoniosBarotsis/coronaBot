@@ -273,6 +273,8 @@ module.exports = {
                 values.push(arr[i].value);
             }
 
+            let valuesChange = getChange(values);
+
             if (values.length === 0) {
                 message.channel.send('There seems to be no data available for your query, please try again!\n\nIf your spelling is correct be sure to mention that using' +
                     '``.log [country to fix]`` so I fix it later.');
@@ -290,6 +292,11 @@ module.exports = {
                     data: {
                         labels: dates,
                         datasets: [{
+                            label: '(Experimental) rate of change change',
+                            data: valuesChange,
+                            fill: true,
+                            backgroundColor: 'rgba(0,0,255, 1)'
+                        }, {
                             label: getGraphLabel(),
                             data: values,
                             fill: true,
@@ -393,6 +400,15 @@ module.exports = {
                 return 'US';
             else
                 return knownCountry;
+        }
+
+        function getChange(arr) {
+            let finalArray = [arr[0]];
+
+            for (let i = 1; i < arr.length; i++)
+                finalArray.push(arr[i] - arr[i-1]);
+
+            return finalArray;
         }
     },
 };
