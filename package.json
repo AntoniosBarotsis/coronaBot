@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
+  "jest": {
+    "testRegex": "tests/.*\\.(js|jsx)$"
+  },
   "scripts": {
     "start": "node app.js",
-    "test": "node cv_cmd.js",
+    "test": "jest --verbose --coverage --passWithNoTests",
     "cv": "node cv_cmd.js"
   },
   "author": "",
@@ -19,5 +22,8 @@
     "plotly": "^1.0.6",
     "request": "^2.88.2",
     "scramjet": "^4.28.2"
+  },
+  "devDependencies": {
+    "jest": "^25.2.3"
   }
 }
