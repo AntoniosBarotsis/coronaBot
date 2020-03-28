@@ -1,6 +1,6 @@
 const {StringStream} = require("scramjet");
 const request = require("request");
-const axios = require('axios')
+const axios = require('axios');
 const username = process.env.name;
 const apikey = process.env.apikey;
 const prefix = process.env.prefix;
