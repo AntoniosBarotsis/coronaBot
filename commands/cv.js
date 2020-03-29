@@ -292,7 +292,7 @@ module.exports = {
                     data: {
                         labels: dates,
                         datasets: [{
-                            label: '(Experimental) rate of change change',
+                            label: '(Experimental) rate of change',
                             data: valuesChange,
                             fill: true,
                             backgroundColor: 'rgba(0,0,255, 1)'
