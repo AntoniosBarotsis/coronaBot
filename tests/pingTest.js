@@ -9,7 +9,7 @@ describe('ping.js', () => {
     it('ping works', async () => {
         await util.getCommand('ping').then(e => {
             e.execute(message);
-            // expect(e.execute(message)).toHaveBeenCalled();
+            expect(message.channel.send).toHaveBeenCalled();
             expect(message.channel.send).toHaveBeenLastCalledWith('Pong')
         });
     })
