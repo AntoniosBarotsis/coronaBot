@@ -35,7 +35,14 @@ jobs:
     - name: Test
       run: npm test --coverage
 
-    - name: Coveralls
+    - name: Coveralls Parallel
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel: true
+
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true
