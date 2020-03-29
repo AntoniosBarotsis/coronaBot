@@ -21,9 +21,3 @@ for (const file of module.exports.commandFiles) {
 
 const myCommands = arr;
 const commandNames = myCommands.keyArray();
-
-// This is me testing dw about it
-// module.exports.getCommand('ping').then(res => {
-//     console.log(`Result: ${res.name}`);
-//     // res.execute() would normally run the function
-// });
