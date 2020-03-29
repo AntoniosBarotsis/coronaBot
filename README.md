@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/AntoniosBarotsis/coronaBot/badge.svg?branch=master)](https://coveralls.io/github/AntoniosBarotsis/coronaBot?branch=master)
+
 # Covid-19 Discord Bot
 
 A simple discord bot that can query data about confirmed, death and recovered cases regarding covid-19, make plots with that data and use regression to make short term predictions. 
