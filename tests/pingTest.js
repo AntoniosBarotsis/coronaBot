@@ -6,7 +6,14 @@ describe('ping.js', () => {
             send: jest.fn(),
         },
     };
-    it('ping works', async() => {
+
+    it('Command is found', async() => {
+        await util.getCommand('ping').then(() => {
+            expect(0).toBe(0);
+        });
+    });
+
+    it('ping', async() => {
         await util.getCommand('ping').then(e => {
             e.execute(message);
             expect(message.channel.send).toHaveBeenCalled();
