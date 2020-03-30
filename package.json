@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node app.js",
     "test": "jest --verbose --coverage --passWithNoTests",
-    "test:coveralls": "cat lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test:coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "cv": "node cv_cmd.js"
   },
   "author": "",
