@@ -10,7 +10,6 @@
   },
   "extends": [
     "strongloop",
-    "standard",
     "plugin:jest/recommended"
   ],
   "globals": {
@@ -21,7 +20,8 @@
     "ecmaVersion": 2018
   },
   "rules": {
-    "max-len": [2, 170, 8],
+    "strict": [2, "never"],
+    "max-len": [2, 171, 8],
     "indent": ["error", 4]
   }
 }

@@ -1,12 +1,12 @@
-const { StringStream } = require('scramjet')
-const request = require('request')
-const axios = require('axios')
-const prefix = process.env.prefix
-const fs = require('fs')
+const { StringStream } = require('scramjet');
+const request = require('request');
+const axios = require('axios');
+const prefix = process.env.prefix;
+const fs = require('fs');
 // const population = require('./../data/population')
-const recovered = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv'
-const confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
-const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
+const recovered = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
+const confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
+const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
 
 module.exports = {
     name: 'cv',
@@ -15,21 +15,21 @@ module.exports = {
       'default. Instead of a specific country the bot supports ``all`` for all countries and ``other``' +
       ' for all countries other than china.',
     show: true,
-    execute: function (message, args) {
-        let flag
+    execute: function(message, args) {
+        let flag;
 
         // Check if args[0] is r or d, else apply c (default).
         if (args[0].length === 1) { // Its one of the 3 mentioned above.
-            flag = args[0]
+            flag = args[0];
         } else {
-            flag = 'c'
+            flag = 'c';
         } // Default case
 
-        let country = ''
+        let country = '';
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-            country = replaceKnownCountry(country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', ''))
+            country = replaceKnownCountry(country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', ''));
         } else { // Country isn't polluted by a url modifier.
-            country = replaceKnownCountry(country.concat(args).replace(/,/g, ' '))
+            country = replaceKnownCountry(country.concat(args).replace(/,/g, ' '));
         }
 
         // if (country.includes('pop')) {
@@ -39,42 +39,42 @@ module.exports = {
 
         // Handle some cases like these here
 
-        const urlData = []
+        const urlData = [];
 
         // This part checks the first flag and adds the relevant data to urlData.
         // Eventually there will be a second part like this that will add data for the second country.
         if (flag === 'c') {
-            urlData.push(getData(confirmed))
+            urlData.push(getData(confirmed));
         } else if (flag === 'd') {
-            urlData.push(getData(deaths))
+            urlData.push(getData(deaths));
         } else {
-            urlData.push(getData(recovered))
+            urlData.push(getData(recovered));
         }
 
         Promise.all(urlData).then(arr => {
-            generateGraph(arr[0])
-        })
+            generateGraph(arr[0]);
+        });
 
         /**
      * Parses url and prints the relevant filtered data.
      * @param source
      */
-        function getData (source) {
-            const rows = []
-            return new Promise(function (resolve, reject) {
+        function getData(source) {
+            const rows = [];
+            return new Promise(function(resolve, reject) {
                 request.get(source) // Grabs data from the provided url
                     .pipe(new StringStream()) // Pipes it into a string stream
                     .CSVParse() // parses it (csv format)
                     .consume(object => rows.push(object)) // pushes everything into rows[]
                     .then(() => {
-                        const arr = searchRow(rows, country) // Generates the array we want
+                        const arr = searchRow(rows, country); // Generates the array we want
                         // eslint-disable-next-line max-len
-                        const finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))) // Filters out stuff, configure this as you like
-                        resolve(finalArray)
+                        const finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
+                        resolve(finalArray);
                     }).catch(error => {
-                        console.error(error)
-                    })
-            })
+                        console.error(error);
+                    });
+            });
         }
 
         /**
@@ -83,16 +83,16 @@ module.exports = {
      * @param index
      * @returns {[]}
      */
-        function getRowData (arr, index) {
-            const finalArray = []
+        function getRowData(arr, index) {
+            const finalArray = [];
 
             for (let i = 4; i < arr[0].length; i++) { // Dates start from index 4
                 finalArray.push({
                     date: arr[0][i],
-                    value: parseInt(arr[index][i], 10)
-                })
+                    value: parseInt(arr[index][i], 10),
+                });
             }
-            return finalArray
+            return finalArray;
         }
 
         /**
@@ -102,13 +102,13 @@ module.exports = {
      * @param country
      * @returns {*[]}
      */
-        function searchRow (data, country) {
+        function searchRow(data, country) {
             if (country === 'all') {
-                return sumCases(data, null, true)
+                return sumCases(data, null, true);
             } else if (country === 'other') {
-                return sumCases(data, null, false)
+                return sumCases(data, null, false);
             } else {
-                return sumCases(data, country, true)
+                return sumCases(data, country, true);
             }
         }
 
@@ -119,41 +119,41 @@ module.exports = {
      * @param includeChina
      * @returns {[]}
      */
-        function sumCases (arr, country, includeChina) {
-            let first = true
-            let initialRow = []
-            let currentRow = []
+        function sumCases(arr, country, includeChina) {
+            let first = true;
+            let initialRow = [];
+            let currentRow = [];
 
             for (let i = 0; i < arr.length; i++) { // Loops through the entire array
                 if (country) { // If a country is given
                     if (includesCountry(arr, i, country)) {
                         if (first) { // The first time this is ran (and hits) we want to update initialRow
-                            initialRow = getRowData(arr, i)
-                            first = false
+                            initialRow = getRowData(arr, i);
+                            first = false;
                         } else { // All other hits are added on top
-                            currentRow = getRowData(arr, i)
-                            initialRow = sumRows(initialRow, currentRow)
+                            currentRow = getRowData(arr, i);
+                            initialRow = sumRows(initialRow, currentRow);
                         }
                     }
                 } else { // This is either all or other
                     if (includeChina) { // All
-                        initialRow = getRowData(arr, i)
+                        initialRow = getRowData(arr, i);
                         for (let i = 2; i < arr.length; i++) {
-                            currentRow = getRowData(arr, i)
-                            initialRow = sumRows(initialRow, currentRow)
+                            currentRow = getRowData(arr, i);
+                            initialRow = sumRows(initialRow, currentRow);
                         }
                     } else { // Other
-                        initialRow = getRowData(arr, i)
+                        initialRow = getRowData(arr, i);
                         for (let i = 2; i < arr.length; i++) {
                             if (!includesCountry(arr, i, 'china')) { // China must not be included in the row
-                                currentRow = getRowData(arr, i)
-                                initialRow = sumRows(initialRow, currentRow)
+                                currentRow = getRowData(arr, i);
+                                initialRow = sumRows(initialRow, currentRow);
                             }
                         }
                     }
                 }
             }
-            return initialRow
+            return initialRow;
         }
 
         /**
@@ -162,11 +162,11 @@ module.exports = {
      * @param row2
      * @returns {*}
      */
-        function sumRows (row1, row2) {
+        function sumRows(row1, row2) {
             for (let i = 0; i < row1.length; i++) {
-                row1[i].value += row2[i].value
+                row1[i].value += row2[i].value;
             }
-            return row1
+            return row1;
         }
 
         /**
@@ -177,16 +177,16 @@ module.exports = {
      * @param country
      * @returns {boolean}
      */
-        function includesCountry (arr, index, country) {
-            let check = ''
+        function includesCountry(arr, index, country) {
+            let check = '';
             if (arr[index][0]) {
-                check += arr[index][0].toLowerCase() + ' '
+                check += arr[index][0].toLowerCase() + ' ';
             }
             if (arr[index][1]) {
-                check += arr[index][1].toLowerCase() + ' '
+                check += arr[index][1].toLowerCase() + ' ';
             }
 
-            return check.match(`\\b${country.toLowerCase()}\\b`)
+            return check.match(`\\b${country.toLowerCase()}\\b`);
         }
 
         /**
@@ -194,16 +194,16 @@ module.exports = {
      * @param arr
      * @returns {[]}
      */
-        function filterCasesEmpty (arr) {
-            const finalArray = []
+        function filterCasesEmpty(arr) {
+            const finalArray = [];
 
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i].value !== 0) {
-                    finalArray.push(arr[i])
+                    finalArray.push(arr[i]);
                 }
             }
 
-            return finalArray
+            return finalArray;
         }
 
         /**
@@ -211,18 +211,18 @@ module.exports = {
      * @param arr
      * @returns {[]}
      */
-        function filterCasesDupes (arr) {
-            const finalArray = []
+        function filterCasesDupes(arr) {
+            const finalArray = [];
 
             for (let i = 0; i < arr.length; i++) {
                 if (i === 0) {
-                    finalArray.push(arr[i])
+                    finalArray.push(arr[i]);
                 } else if (arr[i].value !== arr[i - 1].value) {
-                    finalArray.push(arr[i])
+                    finalArray.push(arr[i]);
                 }
             }
 
-            return finalArray
+            return finalArray;
         }
 
         /**
@@ -231,18 +231,18 @@ module.exports = {
      * @param arr
      * @returns {[]}
      */
-        function filterCasesDecreasing (arr) {
-            const finalArray = []
+        function filterCasesDecreasing(arr) {
+            const finalArray = [];
 
             for (let i = 0; i < arr.length; i++) {
                 if (i === 0) {
-                    finalArray.push(arr[i])
+                    finalArray.push(arr[i]);
                 } else if (arr[i].value >= arr[i - 1].value) {
-                    finalArray.push(arr[i])
+                    finalArray.push(arr[i]);
                 }
             }
 
-            return finalArray
+            return finalArray;
         }
 
         // /**
@@ -259,42 +259,42 @@ module.exports = {
      * @param arr
      * @returns {[]}
      */
-        function formatForGraph (arr) {
-            const arrFinal = []
+        function formatForGraph(arr) {
+            const arrFinal = [];
 
             for (let i = 0; i < arr.length; i++) {
-                const temp = arr[i].date.split('/')
+                const temp = arr[i].date.split('/');
                 arrFinal.push({
                     date: `${temp[2]}-${temp[0]}-${temp[1]}`,
-                    value: arr[i].value
-                })
+                    value: arr[i].value,
+                });
             }
-            return arrFinal
+            return arrFinal;
         }
 
         /**
      * Generates a graph from the given data, exports it as a jpeg file and sends it.
      * @param arr
      */
-        function generateGraph (arr) {
-            message.channel.startTyping()
+        function generateGraph(arr) {
+            message.channel.startTyping();
 
-            const dates = []
-            const values = []
+            const dates = [];
+            const values = [];
 
             for (let i = 0; i < arr.length; i++) {
-                dates.push(arr[i].date)
-                values.push(arr[i].value)
+                dates.push(arr[i].date);
+                values.push(arr[i].value);
             }
 
-            const valuesChange = getChange(values)
+            const valuesChange = getChange(values);
 
             if (values.length === 0) {
                 message.channel.send('There seems to be no data available for your query, please try again!\n\n' +
             'If your spelling is correct be sure to mention that using' +
-            '``.log [country to fix]`` so I fix it later.')
-                message.channel.stopTyping()
-                return
+            '``.log [country to fix]`` so I fix it later.');
+                message.channel.stopTyping();
+                return;
             }
 
             const chartData = {
@@ -310,41 +310,41 @@ module.exports = {
                             label: '(Experimental) rate of change',
                             data: valuesChange,
                             fill: true,
-                            backgroundColor: 'rgba(0,0,255, 1)'
+                            backgroundColor: 'rgba(0,0,255, 1)',
                         }, {
                             label: getGraphLabel(),
                             data: values,
                             fill: true,
-                            backgroundColor: getGraphColor()
-                        }]
+                            backgroundColor: getGraphColor(),
+                        }],
                     },
                     options: {
                         legend: {
                             labels: {
-                                fontColor: 'white'
-                            }
-                        }
-                    }
-                }
-            }
+                                fontColor: 'white',
+                            },
+                        },
+                    },
+                },
+            };
 
             // post req. with params to create our chart
             axios({
                 method: 'post',
                 url: 'https://quickchart.io/chart',
                 responseType: 'stream',
-                data: chartData
+                data: chartData,
             })
                 .then((res) => {
                     // pipe image into writestream and send image when done
                     res.data.pipe(fs.createWriteStream('1.jpeg'))
                         .on('finish', () => {
-                            message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping())
-                        })
+                            message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
+                        });
                 })
                 .catch((err) => {
-                    console.error(err)
-                })
+                    console.error(err);
+                });
         }
 
         // function getPopulation (country) {
@@ -375,13 +375,13 @@ module.exports = {
      * Returns the color that corresponds to the given flag
      * @returns {string}
      */
-        function getGraphColor () {
+        function getGraphColor() {
             if (flag === 'r') {
-                return 'rgba(0,200,83, 1)'
+                return 'rgba(0,200,83, 1)';
             } else if (flag === 'd') {
-                return 'rgba(235,40,40, 1)'
+                return 'rgba(235,40,40, 1)';
             } else {
-                return 'rgba(41, 121, 255, 1)'
+                return 'rgba(41, 121, 255, 1)';
             }
         }
 
@@ -389,21 +389,21 @@ module.exports = {
      * Returns the label that corresponds to the given flag
      * @returns {string}
      */
-        function getGraphLabel () {
-            let actualCountry = country.charAt(0).toUpperCase() + country.slice(1)
+        function getGraphLabel() {
+            let actualCountry = country.charAt(0).toUpperCase() + country.slice(1);
 
             if (country === 'all') {
-                actualCountry = 'all countries'
+                actualCountry = 'all countries';
             } else if (country === 'other') {
-                actualCountry = 'all countries except China'
+                actualCountry = 'all countries except China';
             }
 
             if (flag === 'r') {
-                return `Recovered cases in ${actualCountry}`
+                return `Recovered cases in ${actualCountry}`;
             } else if (flag === 'd') {
-                return `Deaths in ${actualCountry}`
+                return `Deaths in ${actualCountry}`;
             } else {
-                return `Confirmed cases in ${actualCountry}`
+                return `Confirmed cases in ${actualCountry}`;
             }
         }
 
@@ -412,24 +412,24 @@ module.exports = {
      * @param knownCountry
      * @returns {string|*}
      */
-        function replaceKnownCountry (knownCountry) {
+        function replaceKnownCountry(knownCountry) {
             if (knownCountry.toLowerCase() === 'vatican') {
-                return 'holy see'
+                return 'holy see';
             } else if (knownCountry.toLowerCase() === 'usa') {
-                return 'US'
+                return 'US';
             } else {
-                return knownCountry
+                return knownCountry;
             }
         }
 
-        function getChange (arr) {
-            const finalArray = [arr[0]]
+        function getChange(arr) {
+            const finalArray = [arr[0]];
 
             for (let i = 1; i < arr.length; i++) {
-                finalArray.push(arr[i] - arr[i - 1])
+                finalArray.push(arr[i] - arr[i - 1]);
             }
 
-            return finalArray
+            return finalArray;
         }
-    }
-}
+    },
+};
