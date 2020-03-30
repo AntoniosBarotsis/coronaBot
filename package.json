@@ -10,7 +10,6 @@
   "scripts": {
     "start": "node app.js",
     "test": "jest --verbose --coverage --passWithNoTests",
-    "test:coveralls": "jest --coverage --passWithNoTests && cat ./coverage/lcov.info | coveralls",
     "cv": "node cv_cmd.js"
   },
   "author": "",
@@ -26,7 +25,6 @@
     "scramjet": "^4.28.2"
   },
   "devDependencies": {
-    "coveralls": "^3.0.11",
     "jest": "^25.2.3"
   }
 }
