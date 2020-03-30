@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js --ignore /tests/pingTest.js --ignore /data/log.json",
+    "lint": "eslint --fix --ignore-path .gitignore .",
     "test": "jest",
     "cv": "node cv_cmd.js"
   },
@@ -21,6 +22,10 @@
     "scramjet": "^4.28.2"
   },
   "devDependencies": {
-    "jest": "^25.2.3"
+    "eslint": "^6.8.0",
+    "eslint-config-strongloop": "^2.1.0",
+    "eslint-plugin-jest": "^23.8.2",
+    "jest": "^25.2.3",
+    "prettier": "^2.0.2"
   }
 }

@@ -1,0 +1,27 @@
+{
+  "plugins": [
+    "jest"
+  ],
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "node": true,
+    "jest/globals": true
+  },
+  "extends": [
+    "strongloop",
+    "standard",
+    "plugin:jest/recommended"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "max-len": [2, 170, 8],
+    "indent": ["error", 4]
+  }
+}
