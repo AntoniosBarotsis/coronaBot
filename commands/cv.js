@@ -4,7 +4,7 @@ const axios = require('axios');
 const prefix = process.env.prefix;
 const fs = require('fs');
 const utility = require('./../data/utility');
-// const population = require('./../data/population')
+const population = require('./../data/population');
 const recovered = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
 const confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
@@ -12,9 +12,9 @@ const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 module.exports = {
     name: 'cv',
     description: 'Displays number of confirmed/deaths/recovered cases of covid-19 on specific countries.',
-    usage: '``' + prefix + 'cv [c/r/d] [country]``\nIf the first argument is left out, c is being selected by ' +
+    usage: '``' + prefix + 'cv [c/r/d] [country] [flag]``\nIf the first argument is left out, c is being selected by ' +
       'default. Instead of a specific country the bot supports ``all`` for all countries and ``other``' +
-      ' for all countries other than china.',
+      ' for all countries other than china.\nSupported flags are:\n - pie: Returns a pie chart (this is always c)',
     show: true,
     execute: function(message, args) {
         let flag;
@@ -33,20 +33,36 @@ module.exports = {
             country = utility.replaceKnownCountry(country.concat(args).replace(/,/g, ' '));
         }
 
+        let pie = false;
+        if (country.includes(' pie')) {
+            country = country.replace(' pie', '');
+            pie = true;
+        }
+
         const urlData = [];
 
         // This part checks the first flag and adds the relevant data to urlData.
         // Eventually there will be a second part like this that will add data for the second country.
-        if (flag === 'c') {
-            urlData.push(getData(confirmed));
-        } else if (flag === 'd') {
-            urlData.push(getData(deaths));
-        } else {
-            urlData.push(getData(recovered));
-        }
+        // if (flag === 'c') {
+        //     urlData.push(getData(confirmed));
+        // } else if (flag === 'd') {
+        //     urlData.push(getData(deaths));
+        // } else {
+        //     urlData.push(getData(recovered));
+        // }
+
+        urlData.push(getData(confirmed));
+        urlData.push(getData(deaths));
+        urlData.push(getData(recovered));
 
         Promise.all(urlData).then(arr => {
-            generateGraph(arr[0]);
+            if (pie) {
+                let populationData = utility.populationData(country, arr[0][arr[0].length - 1].value, arr[1][arr[1].length - 1].value,
+                    arr[2][arr[2].length - 1].value, utility.getPopulation(country, population));
+                generatePieChart(populationData);
+            } else {
+                generateGraph(arr[0]);
+            }
         });
 
         function getData(source) {
@@ -185,13 +201,58 @@ module.exports = {
                 });
         }
 
-        // function populationData (country, arrC) {
-        //     let msg = ''
-        //     const pop = getPopulation(country)
-        //     const confirmedOverPop = (100 * arrC[arrC.length - 1].value / pop).toFixed(2)
-        //
-        //     msg += `Percentage of the population that has been infected: ${confirmedOverPop}%`
-        //     return msg
-        // }
+        function generatePieChart(objectData) {
+            message.channel.startTyping();
+
+            let labels, values;
+
+            labels = ['% of cases that are still active', '% of cases that recovered', '% of cases that died'];
+            values = [objectData.activeOverConfirmed, objectData.recoveredOverConfirmed, objectData.deadOverConfirmed];
+
+            const chartData = {
+                backgroundColor: 'rgba(44,47,51, 1)',
+                width: 1000,
+                height: 500,
+                format: 'jpg',
+                chart: {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: ['rgba(41, 121, 255, 1)', 'rgba(0, 200, 83, 1)', 'rgba(235, 40, 40, 1)'],
+                        }],
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: `Confirmed cases in ${country.charAt(0).toUpperCase() + country.slice(1)}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
+                        },
+                        legend: {
+                            labels: {
+                                fontColor: 'white',
+                            },
+                        },
+                    },
+                },
+            };
+
+            axios({
+                method: 'post',
+                url: 'https://quickchart.io/chart',
+                responseType: 'stream',
+                data: chartData,
+            })
+                .then((res) => {
+                    // pipe image into writestream and send image when done
+                    res.data.pipe(fs.createWriteStream('1.jpeg'))
+                        .on('finish', () => {
+                            message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
+                        });
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
     },
 };
