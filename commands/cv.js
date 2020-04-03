@@ -28,16 +28,25 @@ module.exports = {
 
         let country = '';
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-            country = utility.replaceKnownCountry(country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', ''));
+            country = country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', '');
         } else { // Country isn't polluted by a url modifier.
-            country = utility.replaceKnownCountry(country.concat(args).replace(/,/g, ' '));
+            country = country.concat(args).replace(/,/g, ' ');
         }
 
         let pie = false;
+        let change = false;
+        let countryP;
+
         if (country.includes(' pie')) {
             country = country.replace(' pie', '');
             pie = true;
+            countryP = utility.replaceKnownCountryPie(country);
+        } else if (country.includes(' change')) {
+            country = country.replace(' change', '');
+            change = true;
         }
+
+        country = utility.replaceKnownCountry(country);
 
         const urlData = [];
 
@@ -57,15 +66,24 @@ module.exports = {
 
         Promise.all(urlData).then(arr => {
             if (pie) {
-                let populationData = utility.populationData(country, arr[0][arr[0].length - 1].value, arr[1][arr[1].length - 1].value,
-                    arr[2][arr[2].length - 1].value, utility.getPopulation(country, population));
+                let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
+                    arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
                 generatePieChart(populationData);
             } else {
-                generateGraph(arr[0]);
+                if (flag === 'd')
+                    generateGraph(arr[1]);
+                else if (flag === 'r')
+                    generateGraph(arr[2]);
+                else
+                    generateGraph(arr[0]);
             }
         });
 
         function getData(source) {
+            /**
+             * Grabs data from the online csv file
+             * @type {*[]}
+             */
             const rows = [];
             return new Promise(function(resolve, reject) {
                 request.get(source) // Grabs data from the provided url
@@ -73,7 +91,7 @@ module.exports = {
                     .CSVParse() // parses it (csv format)
                     .consume(object => rows.push(object)) // pushes everything into rows[]
                     .then(() => {
-                        const arr = searchRow(rows, country); // Generates the array we want
+                        const arr = searchRow(rows, (country)); // Generates the array we want
                         // eslint-disable-next-line max-len
                         const finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
                         resolve(finalArray);
@@ -83,6 +101,12 @@ module.exports = {
             });
         }
 
+        /**
+         * Calls sumCases with the appropriate arguments
+         * @param data
+         * @param country
+         * @returns {*[]}
+         */
         function searchRow(data, country) {
             if (country === 'all') {
                 return sumCases(data, null, true);
@@ -93,6 +117,13 @@ module.exports = {
             }
         }
 
+        /**
+         * Sums rows in case there are multiple mentions of them (for example China) as well as all and other cases
+         * @param arr
+         * @param country
+         * @param includeChina
+         * @returns {[]}
+         */
         function sumCases(arr, country, includeChina) {
             let first = true;
             let initialRow = [];
@@ -130,6 +161,10 @@ module.exports = {
             return initialRow;
         }
 
+        /**
+         * Generates and sends line chart
+         * @param arr
+         */
         function generateGraph(arr) {
             message.channel.startTyping();
 
@@ -141,7 +176,25 @@ module.exports = {
                 values.push(arr[i].value);
             }
 
-            const valuesChange = utility.getChange(values);
+            let dataset;
+
+            if (change) {
+                const valuesChange = utility.getChange(values);
+                dataset = {
+                    label: `${utility.getGraphLabel(country, flag)} (rate of change)`,
+                    data: valuesChange,
+                    fill: true,
+                    backgroundColor: utility.getGraphColor(flag),
+                };
+            } else {
+                dataset = {
+                    label: utility.getGraphLabel(country, flag),
+                    data: values,
+                    fill: true,
+                    backgroundColor: utility.getGraphColor(flag),
+                };
+            }
+
 
             if (values.length === 0) {
                 message.channel.send('There seems to be no data available for your query, please try again!\n\n' +
@@ -160,17 +213,7 @@ module.exports = {
                     type: 'line',
                     data: {
                         labels: dates,
-                        datasets: [{
-                            label: '(Experimental) rate of change',
-                            data: valuesChange,
-                            fill: true,
-                            backgroundColor: 'rgba(0,0,255, 1)',
-                        }, {
-                            label: utility.getGraphLabel(country, flag),
-                            data: values,
-                            fill: true,
-                            backgroundColor: utility.getGraphColor(flag),
-                        }],
+                        datasets: [dataset],
                     },
                     options: {
                         legend: {
@@ -201,6 +244,10 @@ module.exports = {
                 });
         }
 
+        /**
+         * Generates and sends pie chart
+         * @param objectData
+         */
         function generatePieChart(objectData) {
             message.channel.startTyping();
 
@@ -226,7 +273,7 @@ module.exports = {
                     options: {
                         title: {
                             display: true,
-                            text: `Confirmed cases in ${country.charAt(0).toUpperCase() + country.slice(1)}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
+                            text: `Confirmed cases in ${utility.getGraphPieCountry(country)}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
                         },
                         legend: {
                             labels: {
