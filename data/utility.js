@@ -289,7 +289,7 @@ function getGraphPieCountry(country) {
 function replaceKnownCountryPie(country) {
     if (country.toLowerCase() === 'vatican')
         return 'Vatican City State';
-    else if (country.toLowerCase() === 'korea')
+    else if (country.toLowerCase() === 'korea' || country.toLowerCase() === 'south korea')
         return 'South Korea';
     else if (country.toLowerCase() === 'usa')
         return 'us';

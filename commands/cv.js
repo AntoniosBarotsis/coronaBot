@@ -12,9 +12,12 @@ const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 module.exports = {
     name: 'cv',
     description: 'Displays number of confirmed/deaths/recovered cases of covid-19 on specific countries.',
-    usage: '``' + prefix + 'cv [c/r/d] [country] [flag]``\nIf the first argument is left out, c is being selected by ' +
-      'default. Instead of a specific country the bot supports ``all`` for all countries and ``other``' +
-      ' for all countries other than china.\nSupported flags are:\n - pie: Returns a pie chart (this is always c)',
+    usage: '``' + prefix + 'cv [c/r/d](optional) [country/all/other] [pie/change]``\n' +
+        ' - If the first argument is left out, c is being selected by default.\n' +
+        ' - All: Returns data on all countries\n' +
+        ' - Other: Returns data on all countries except China\n' +
+        ' - pie: Returns a pie chart (this is always c)\n' +
+        ' - change: Returns a line chart showing the rate of change or the corresponding modifier',
     show: true,
     execute: function(message, args) {
         let flag;

@@ -183,6 +183,84 @@ describe('filterCasesEmpty', () => {
     });
 });
 
-describe('includesCountry', () => {
+describe('includesCountry', () => {});
 
+describe('getPopulation', () => {
+    const population = require('../data/population');
+
+    it('us', async() => {
+        expect(library.getPopulation('us', null)).toBe(329470573);
+    });
+
+    it('all', async() => {
+        expect(library.getPopulation('all', null)).toBe(7444509223);
+    });
+
+    it('other', async() => {
+        expect(library.getPopulation('other', null)).toBe(6034991826);
+    });
+
+    it('Greece', async() => {
+        expect(library.getPopulation('greece', population)).toBe(11159773);
+    });
+});
+
+describe('populationData', () => {
+    let population = 10;
+    let populationC = {value: 7};
+    let populationD = {value: 2};
+    let populationR = {value: 3};
+
+    let obj = {
+        populationC: populationC.value,
+        confirmedOverPop: (70.00).toFixed(2),
+        recoveredOverConfirmed: (300 / 7).toFixed(2),
+        deadOverConfirmed: (200 / 7).toFixed(2),
+        activeOverConfirmed: (200 / 7).toFixed(2),
+        activeCases: populationC.value - populationD.value - populationR.value,
+    };
+
+    it('No populationC', async() => {
+        expect(library.populationData(null, populationD, populationR, population).populationC).toStrictEqual(0);
+    });
+
+    it('All params passed', async() => {
+        expect(library.populationData(populationC, populationD, populationR, population)).toStrictEqual(obj);
+    });
+});
+
+describe('getGraphPieCountry', () => {
+    it('all', async() => {
+        expect(library.getGraphPieCountry('all')).toStrictEqual('all countries');
+    });
+
+    it('other', async() => {
+        expect(library.getGraphPieCountry('other')).toStrictEqual('all countries except China');
+    });
+
+    it('Greece', async() => {
+        expect(library.getGraphPieCountry('greece')).toStrictEqual('Greece');
+    });
+});
+
+describe('replaceKnownCountryPie', () => {
+    it('unknown country', async() => {
+        expect(library.replaceKnownCountryPie('greece')).toStrictEqual('greece');
+    });
+
+    it('vatican', async() => {
+        expect(library.replaceKnownCountryPie('vAtiCAN')).toStrictEqual('Vatican City State');
+    });
+
+    it('korea', async() => {
+        expect(library.replaceKnownCountryPie('korea')).toStrictEqual('South Korea');
+    });
+
+    it('korea2', async() => {
+        expect(library.replaceKnownCountryPie('soUTH koREA')).toStrictEqual('South Korea');
+    });
+
+    it('us', async() => {
+        expect(library.replaceKnownCountryPie('usa')).toStrictEqual('us');
+    });
 });
