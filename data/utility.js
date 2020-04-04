@@ -1,159 +1,313 @@
-module.exports = {
-    getChange:
-        function getChange(arr) {
-            const finalArray = [arr[0]];
+module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, formatForGraph, filterCasesDecreasing,
+    filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
+    replaceKnownCountryPie, removeMaliciousChars};
 
-            for (let i = 1; i < arr.length; i++) {
-                finalArray.push(arr[i] - arr[i - 1]);
+/**
+ * Returns difference per array index
+ * @param arr
+ * @returns {[*]}
+ */
+function getChange(arr) {
+    const finalArray = [arr[0]];
+
+    for (let i = 1; i < arr.length; i++) {
+        finalArray.push(arr[i] - arr[i - 1]);
+    }
+    return finalArray;
+}
+
+/**
+ * Replaces some countries so they are found in the csv file
+ * @param knownCountry
+ * @returns {string|*}
+ */
+function replaceKnownCountry(knownCountry) {
+    if (knownCountry.toLowerCase() === 'vatican') {
+        return 'holy see';
+    } else if (knownCountry.toLowerCase() === 'usa') {
+        return 'US';
+    } else if (knownCountry.toLowerCase() === 'uk') {
+        return 'united kingdom';
+    } else if (knownCountry.toLowerCase() === 'south korea') {
+        return 'korea';
+    } else {
+        return knownCountry;
+    }
+}
+
+/**
+ * Generates label to be used in the line chart
+ * @param country
+ * @param flag
+ * @returns {string}
+ */
+function getGraphLabel(country, flag) {
+    let actualCountry = country.charAt(0).toUpperCase() + country.slice(1);
+
+    if (country === 'all') {
+        actualCountry = 'all countries';
+    } else if (country === 'other') {
+        actualCountry = 'all countries except China';
+    }
+
+    if (flag === 'r') {
+        return `Recovered cases in ${actualCountry}`;
+    } else if (flag === 'd') {
+        return `Deaths in ${actualCountry}`;
+    } else {
+        return `Confirmed cases in ${actualCountry}`;
+    }
+}
+
+/**
+ * Returns appropriate color based on the flag
+ * @param flag
+ * @returns {string}
+ */
+function getGraphColor(flag) {
+    if (flag === 'r') {
+        return 'rgba(0, 200, 83, 1)';
+    } else if (flag === 'd') {
+        return 'rgba(235, 40, 40, 1)';
+    } else {
+        return 'rgba(41, 121, 255, 1)';
+    }
+}
+
+/**
+ * Changes date format so its recognised by chart.js
+ * @param arr
+ * @returns {[]}
+ */
+function formatForGraph(arr) {
+    const arrFinal = [];
+
+    for (let i = 0; i < arr.length; i++) {
+        const temp = arr[i].date.split('/');
+        arrFinal.push({
+            date: `${temp[2]}-${temp[0]}-${temp[1]}`,
+            value: arr[i].value,
+        });
+    }
+    return arrFinal;
+}
+
+/**
+ * Filters out indexes where the number of cases decreased (thats impossible, its an error in the csv file)
+ * @param arr
+ * @returns {[]}
+ */
+function filterCasesDecreasing(arr) {
+    const finalArray = [];
+
+    for (let i = 0; i < arr.length; i++) {
+        if (i === 0) {
+            finalArray.push(arr[i]);
+        } else if (arr[i].value >= arr[i - 1].value) {
+            finalArray.push(arr[i]);
+        }
+    }
+
+    return finalArray;
+}
+
+/**
+ * Filters out duplicates
+ * @param arr
+ * @returns {[]}
+ */
+function filterCasesDupes(arr) {
+    const finalArray = [];
+
+    for (let i = 0; i < arr.length; i++) {
+        if (i === 0) {
+            finalArray.push(arr[i]);
+        } else if (arr[i].value !== arr[i - 1].value) {
+            finalArray.push(arr[i]);
+        }
+    }
+
+    return finalArray;
+}
+
+/**
+ * Filters out empty cases (0)
+ * @param arr
+ * @returns {[]}
+ */
+function filterCasesEmpty(arr) {
+    const finalArray = [];
+
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i].value !== 0) {
+            finalArray.push(arr[i]);
+        }
+    }
+
+    return finalArray;
+}
+
+/**
+ * Returns whether the passed row contain the passed country
+ * @param arr
+ * @param index
+ * @param country
+ * @returns {RegExpMatchArray}
+ */
+function includesCountry(arr, index, country) {
+    let check = '';
+    if (arr[index][0]) {
+        check += arr[index][0].toLowerCase() + ' ';
+    }
+    if (arr[index][1]) {
+        check += arr[index][1].toLowerCase() + ' ';
+    }
+
+    return check.match(`\\b${country.toLowerCase()}\\b`);
+}
+
+/**
+ * Sums 2 rows (arrays)
+ * @param row1
+ * @param row2
+ * @returns {*}
+ */
+function sumRows(row1, row2) {
+    for (let i = 0; i < row1.length; i++) {
+        row1[i].value += row2[i].value;
+    }
+    return row1;
+}
+
+/**
+ * Returns an array of data (one country row)
+ * @param arr
+ * @param index
+ * @returns {[]}
+ */
+function getRowData(arr, index) {
+    const finalArray = [];
+
+    for (let i = 4; i < arr[0].length; i++) { // Dates start from index 4
+        finalArray.push({
+            date: arr[0][i],
+            value: parseInt(arr[index][i], 10),
+        });
+    }
+    return finalArray;
+}
+
+/**
+ * Returns the population of the passed country
+ * @param country
+ * @param population
+ * @returns {number}
+ */
+function getPopulation(country, population) {
+    let num = 0;
+
+    if (country === 'us') {
+        return 329470573;
+    }
+
+    // The numbers for all and other were calculated using the json file, hardcoded to save time.
+    if (country === 'all')
+        num = 7444509223;
+    else if (country === 'other')
+        num = 6034991826;
+    else {
+        for (const i in population) {
+            if (population[i].country.toLowerCase().match(`\\b${country.toLowerCase()}\\b`) && population[i].population) {
+                num += parseInt(population[i].population, 10);
             }
-            return finalArray;
-        },
+        }
+    }
+    return num;
+}
 
-    replaceKnownCountry:
-        function replaceKnownCountry(knownCountry) {
-            if (knownCountry.toLowerCase() === 'vatican') {
-                return 'holy see';
-            } else if (knownCountry.toLowerCase() === 'usa') {
-                return 'US';
-            } else if (knownCountry.toLowerCase() === 'uk') {
-                return 'united kingdom';
-            } else if (knownCountry.toLowerCase() === 'south korea') {
-                return 'korea';
-            } else {
-                return knownCountry;
-            }
-        },
+/**
+ * Returns statistics for pie chart
+ * @param populationC_unchecked
+ * @param populationD_unchecked
+ * @param populationR_unchecked
+ * @param pop
+ * @returns {{recoveredOverConfirmed: string, confirmedOverPop: string, deadOverConfirmed: string, activeOverConfirmed: string, populationC: *, activeCases: number}}
+ */
+function populationData(populationC_unchecked, populationD_unchecked, populationR_unchecked, pop) {
+    let populationC, populationD, populationR;
 
-    getGraphLabel:
-        function getGraphLabel(country, flag) {
-            let actualCountry = country.charAt(0).toUpperCase() + country.slice(1);
+    if (populationC_unchecked)
+        populationC = populationC_unchecked.value;
+    else
+        populationC = 0;
 
-            if (country === 'all') {
-                actualCountry = 'all countries';
-            } else if (country === 'other') {
-                actualCountry = 'all countries except China';
-            }
+    if (populationD_unchecked)
+        populationD = populationD_unchecked.value;
+    else
+        populationD = 0;
 
-            if (flag === 'r') {
-                return `Recovered cases in ${actualCountry}`;
-            } else if (flag === 'd') {
-                return `Deaths in ${actualCountry}`;
-            } else {
-                return `Confirmed cases in ${actualCountry}`;
-            }
-        },
+    if (populationR_unchecked)
+        populationR = populationR_unchecked.value;
+    else
+        populationR = 0;
 
-    getGraphColor:
-        function getGraphColor(flag) {
-            if (flag === 'r') {
-                return 'rgba(0, 200, 83, 1)';
-            } else if (flag === 'd') {
-                return 'rgba(235, 40, 40, 1)';
-            } else {
-                return 'rgba(41, 121, 255, 1)';
-            }
-        },
+    const confirmedOverPop = (100 * populationC / pop).toFixed(2);
+    const recoveredOverConfirmed = (100 * populationR / populationC).toFixed(2);
+    const deadOverConfirmed = (100 * populationD / populationC).toFixed(2);
+    const activeCases = populationC - populationD - populationR;
+    const activeOverConfirmed = (100 * activeCases / populationC).toFixed(2);
 
-    formatForGraph:
-        function formatForGraph(arr) {
-            const arrFinal = [];
+    return {
+        populationC: populationC,
+        confirmedOverPop: confirmedOverPop, // Percentage of the population that has been infected
+        recoveredOverConfirmed: recoveredOverConfirmed, // Percentage of the infected that has recovered
+        deadOverConfirmed: deadOverConfirmed, // Percentage of the infected that has died
+        activeOverConfirmed: activeOverConfirmed, // Percentage of total confirmed cases that is still active
+        activeCases: activeCases, // Active cases
+    };
+}
 
-            for (let i = 0; i < arr.length; i++) {
-                const temp = arr[i].date.split('/');
-                arrFinal.push({
-                    date: `${temp[2]}-${temp[0]}-${temp[1]}`,
-                    value: arr[i].value,
-                });
-            }
-            return arrFinal;
-        },
+/**
+ * Used in the pie chart label
+ * @param country
+ * @returns {string}
+ */
+function getGraphPieCountry(country) {
+    if (country === 'all')
+        return 'all countries';
+    else if (country === 'other')
+        return 'all countries except China';
+    else
+        return country.charAt(0).toUpperCase() + country.slice(1);
+}
 
-    filterCasesDecreasing:
-        function filterCasesDecreasing(arr) {
-            const finalArray = [];
+/**
+ * Replaces some countries to match the ones in population.json
+ * @param country
+ * @returns {string|*}
+ */
+function replaceKnownCountryPie(country) {
+    if (country.toLowerCase() === 'vatican')
+        return 'Vatican City State';
+    else if (country.toLowerCase() === 'korea' || country.toLowerCase() === 'south korea')
+        return 'South Korea';
+    else if (country.toLowerCase() === 'usa')
+        return 'us';
+    else
+        return country;
+}
 
-            for (let i = 0; i < arr.length; i++) {
-                if (i === 0) {
-                    finalArray.push(arr[i]);
-                } else if (arr[i].value >= arr[i - 1].value) {
-                    finalArray.push(arr[i]);
-                }
-            }
+/**
+ * Removes malicious characters that can be used to crash the program from country
+ * @param country
+ * @returns {*}
+ */
+function removeMaliciousChars(country) {
+    let maliciousChars = '[](){}<>-\\/|?!;^$.&*+';
 
-            return finalArray;
-        },
+    for (let i in maliciousChars)
+        if (country.includes(maliciousChars[i]))
+            country = country.split(maliciousChars[i]).join('');
 
-    filterCasesDupes:
-        function filterCasesDupes(arr) {
-            const finalArray = [];
-
-            for (let i = 0; i < arr.length; i++) {
-                if (i === 0) {
-                    finalArray.push(arr[i]);
-                } else if (arr[i].value !== arr[i - 1].value) {
-                    finalArray.push(arr[i]);
-                }
-            }
-
-            return finalArray;
-        },
-
-    filterCasesEmpty:
-        function filterCasesEmpty(arr) {
-            const finalArray = [];
-
-            for (let i = 0; i < arr.length; i++) {
-                if (arr[i].value !== 0) {
-                    finalArray.push(arr[i]);
-                }
-            }
-
-            return finalArray;
-        },
-
-    includesCountry:
-        function includesCountry(arr, index, country) {
-            let check = '';
-            if (arr[index][0]) {
-                check += arr[index][0].toLowerCase() + ' ';
-            }
-            if (arr[index][1]) {
-                check += arr[index][1].toLowerCase() + ' ';
-            }
-
-            return check.match(`\\b${country.toLowerCase()}\\b`);
-        },
-
-    sumRows:
-        function sumRows(row1, row2) {
-            for (let i = 0; i < row1.length; i++) {
-                row1[i].value += row2[i].value;
-            }
-            return row1;
-        },
-
-
-    getRowData:
-        function getRowData(arr, index) {
-            const finalArray = [];
-
-            for (let i = 4; i < arr[0].length; i++) { // Dates start from index 4
-                finalArray.push({
-                    date: arr[0][i],
-                    value: parseInt(arr[index][i], 10),
-                });
-            }
-            return finalArray;
-        },
-
-    getPopulation:
-        function getPopulation(country, population) {
-            let num = 0;
-            for (const i in population) {
-                if (population[i].country.toLowerCase() === 'greece') {
-                    num = population[i].population;
-                }
-            }
-            return num;
-        },
-};
+    return country;
+}
