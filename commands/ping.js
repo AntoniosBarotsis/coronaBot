@@ -6,8 +6,6 @@ module.exports = {
     usage: '``' + prefix + 'ping``',
     show: true,
     execute(message, args) {
-
         message.channel.send('Pong');
-
     },
 };

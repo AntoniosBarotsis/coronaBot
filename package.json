@@ -3,20 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "jest": {
-    "testRegex": "tests/.*\\.(js|jsx)$"
-  },
   "scripts": {
-    "start": "node app.js",
-    "test": "jest --verbose --coverage --passWithNoTests",
+    "start": "nodemon app.js --ignore /tests/pingTest.js --ignore /data/log.json",
+    "lint": "eslint --fix --ignore-path .gitignore .",
+    "test": "jest",
     "cv": "node cv_cmd.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
-    "discord.js": "^12.0.1",
+    "discord.js": "^12.1.1",
     "dotenv": "^8.2.0",
+    "js-file-download": "^0.4.11",
     "ml-regression-polynomial": "^2.1.0",
     "nodemon": "^2.0.2",
     "plotly": "^1.0.6",
@@ -24,6 +23,10 @@
     "scramjet": "^4.28.2"
   },
   "devDependencies": {
-    "jest": "^25.2.3"
+    "eslint": "^6.8.0",
+    "eslint-config-strongloop": "^2.1.0",
+    "eslint-plugin-jest": "^23.8.2",
+    "jest": "^25.2.3",
+    "prettier-eslint": "^9.0.1"
   }
 }

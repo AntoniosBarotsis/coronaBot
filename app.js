@@ -10,19 +10,18 @@ client.commands = new Discord.Collection();
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command)
+    client.commands.set(command.name, command);
 }
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    client.user.setActivity(`${prefix}help`)
+    client.user.setActivity(`${prefix}help`);
 });
 
 client.on('message', message => {
-    if (!message.content.startsWith(prefix) || message.author.bot)
-        return;
+    if (!message.content.startsWith(prefix) || message.author.bot) { return; }
 
-    let args = message.content.substring(prefix.length).split(" ");
+    const args = message.content.substring(prefix.length).split(' ');
     const command = args.shift().toLowerCase();
 
     if (!client.commands.has(command)) return;
@@ -35,6 +34,6 @@ client.on('message', message => {
     }
 });
 
-client.on('error', m => logger.log('error', m));
+client.on('error', m => console.log('error', m));
 
 client.login(token);
