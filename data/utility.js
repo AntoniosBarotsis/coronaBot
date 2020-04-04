@@ -1,6 +1,6 @@
 module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie};
+    replaceKnownCountryPie, removeMaliciousChars};
 
 /**
  * Returns difference per array index
@@ -295,4 +295,19 @@ function replaceKnownCountryPie(country) {
         return 'us';
     else
         return country;
+}
+
+/**
+ * Removes malicious characters that can be used to crash the program from country
+ * @param country
+ * @returns {*}
+ */
+function removeMaliciousChars(country) {
+    let maliciousChars = '[](){}<>-\\/|?!;^$.&*+';
+
+    for (let i in maliciousChars)
+        if (country.includes(maliciousChars[i]))
+            country = country.split(maliciousChars[i]).join('');
+
+    return country;
 }

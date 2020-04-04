@@ -264,3 +264,25 @@ describe('replaceKnownCountryPie', () => {
         expect(library.replaceKnownCountryPie('usa')).toStrictEqual('us');
     });
 });
+
+describe('removeMaliciousChars', () => {
+    it('Should remove one evil char', async() => {
+        expect(library.removeMaliciousChars('greece*')).toStrictEqual('greece');
+    });
+
+    it('Should remove two evil char', async() => {
+        expect(library.removeMaliciousChars('gre+ece*')).toStrictEqual('greece');
+    });
+
+    it('Should remove two evil identical chars', async() => {
+        expect(library.removeMaliciousChars('greece[[')).toStrictEqual('greece');
+    });
+
+    it('Should remove actual regex', async() => {
+        expect(library.removeMaliciousChars('[A-Za-z]*')).toStrictEqual('AZaz');
+    });
+
+    it('Should remove singe evil char', async() => {
+        expect(library.removeMaliciousChars('*')).toStrictEqual('');
+    });
+});

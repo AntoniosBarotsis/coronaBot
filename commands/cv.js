@@ -43,13 +43,13 @@ module.exports = {
         if (country.includes(' pie')) {
             country = country.replace(' pie', '');
             pie = true;
-            countryP = utility.replaceKnownCountryPie(country);
+            countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country));
         } else if (country.includes(' change')) {
             country = country.replace(' change', '');
             change = true;
         }
 
-        country = utility.replaceKnownCountry(country);
+        country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
 
         const urlData = [];
 
@@ -132,7 +132,7 @@ module.exports = {
             let initialRow = [];
             let currentRow = [];
 
-            for (let i = 0; i < arr.length; i++) { // Loops through the entire array
+            for (let i = 1; i < arr.length; i++) { // Loops through the entire array
                 if (country) { // If a country is given
                     if (utility.includesCountry(arr, i, country)) {
                         if (first) { // The first time this is ran (and hits) we want to update initialRow
