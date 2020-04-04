@@ -1,103 +1,118 @@
-const {StringStream} = require("scramjet");
-const request = require("request");
-const axios = require('axios')
-const username = process.env.name;
-const apikey = process.env.apikey;
+const { StringStream } = require('scramjet');
+const request = require('request');
+const axios = require('axios');
 const prefix = process.env.prefix;
-const plotly = require('plotly')(username, apikey);
 const fs = require('fs');
+const utility = require('./../data/utility');
 const population = require('./../data/population');
-const recovered = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv";
-const confirmed = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
-const deaths = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
+const recovered = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
+const confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
+const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
 
 module.exports = {
     name: 'cv',
     description: 'Displays number of confirmed/deaths/recovered cases of covid-19 on specific countries.',
-    usage: '``' + prefix + 'cv [c/r/d] [country]``\nIf the first argument is left out, c is being selected by default. Instead of a specific ' +
-        'country the bot supports ``all`` for all countries and ``other`` for all countries other than china.',
+    usage: '``' + prefix + 'cv [c/r/d](optional) [country/all/other] [pie/change]``\n' +
+        ' - If the first argument is left out, c is being selected by default.\n' +
+        ' - All: Returns data on all countries\n' +
+        ' - Other: Returns data on all countries except China\n' +
+        ' - pie: Returns a pie chart (this is always c)\n' +
+        ' - change: Returns a line chart showing the rate of change or the corresponding modifier',
     show: true,
-    execute(message, args) {
-
-        let url;
+    execute: function(message, args) {
+        let flag;
 
         // Check if args[0] is r or d, else apply c (default).
         if (args[0].length === 1) { // Its one of the 3 mentioned above.
+            flag = args[0];
+        } else {
+            flag = 'c';
+        } // Default case
 
-            if (args[0] === 'd')
-                url = deaths;
-            else if (args[0] === 'r')
-                url = recovered;
-            else
-                url = confirmed;
-        } else
-            url = confirmed; // Default case
-
-        let country = "";
+        let country = '';
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-            country = country.concat(args).replace(/,/g, " ").replace(args[0] + " ", "");
+            country = country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', '');
         } else { // Country isn't polluted by a url modifier.
-            country = country.concat(args).replace(/,/g, " ");
+            country = country.concat(args).replace(/,/g, ' ');
         }
 
-        let toPopulation = false;
+        let pie = false;
+        let change = false;
+        let countryP;
 
-        if (country.includes('pop')) {
-            toPopulation = true;
-            country = country.replace(' pop', '');
+        if (country.includes(' pie')) {
+            country = country.replace(' pie', '');
+            pie = true;
+            countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country));
+        } else if (country.includes(' change')) {
+            country = country.replace(' change', '');
+            change = true;
         }
 
-        getData(url).then(arr => {
-            console.log(`${arr[arr.length-1].value}`);
-            generateGraph(arr)
+        country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
+
+        const urlData = [];
+
+        // This part checks the first flag and adds the relevant data to urlData.
+        // Eventually there will be a second part like this that will add data for the second country.
+        // if (flag === 'c') {
+        //     urlData.push(getData(confirmed));
+        // } else if (flag === 'd') {
+        //     urlData.push(getData(deaths));
+        // } else {
+        //     urlData.push(getData(recovered));
+        // }
+
+        urlData.push(getData(confirmed));
+        urlData.push(getData(deaths));
+        urlData.push(getData(recovered));
+
+        Promise.all(urlData).then(arr => {
+            if (pie) {
+                let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
+                    arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
+                generatePieChart(populationData);
+            } else {
+                if (flag === 'd')
+                    generateGraph(arr[1]);
+                else if (flag === 'r')
+                    generateGraph(arr[2]);
+                else
+                    generateGraph(arr[0]);
+            }
         });
 
-        /**
-         * Parses url and prints the relevant filtered data.
-         * @param source
-         */
         function getData(source) {
-            let rows = [];
-            return new Promise(async function (resolve, reject) {
+            /**
+             * Grabs data from the online csv file
+             * @type {*[]}
+             */
+            const rows = [];
+            return new Promise(function(resolve, reject) {
                 request.get(source) // Grabs data from the provided url
                     .pipe(new StringStream()) // Pipes it into a string stream
                     .CSVParse() // parses it (csv format)
                     .consume(object => rows.push(object)) // pushes everything into rows[]
                     .then(() => {
-                        let arr = searchRow(rows, country); // Generates the array we want
-                        let finalArray = formatForGraph(filterCasesDecreasing(filterCasesDupes(filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
-                        resolve (finalArray);
-                    }).catch(error => {console.error(error);})
-            })
+                        const arr = searchRow(rows, (country)); // Generates the array we want
+                        // eslint-disable-next-line max-len
+                        const finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
+                        resolve(finalArray);
+                    }).catch(error => {
+                        console.error(error);
+                    });
+            });
         }
 
         /**
-         * Returns all dates along with the cases recorded for the said date as an array of objects.
-         * @param arr
-         * @param index
-         * @returns {[]}
-         */
-        function getRowData(arr, index) {
-            let finalArray = [];
-
-            for (let i = 4; i < arr[0].length; i++) { // Dates start from index 4
-                finalArray.push({
-                    "date": arr[0][i],
-                    "value": parseInt(arr[index][i])
-                });
-            }
-            return finalArray;
-        }
-
-        /**
-         * Searches the row that contains the passed country and returns it. This also can return all countries with or without china.
+         * Calls sumCases with the appropriate arguments
          * @param data
          * @param country
          * @returns {*[]}
          */
         function searchRow(data, country) {
             if (country === 'all') {
-                return sumCases(data, null, true)
+                return sumCases(data, null, true);
             } else if (country === 'other') {
                 return sumCases(data, null, false);
             } else {
@@ -106,7 +121,7 @@ module.exports = {
         }
 
         /**
-         * Returns the total amount of cases for a specific country or for all countries with or without china.
+         * Sums rows in case there are multiple mentions of them (for example China) as well as all and other cases
          * @param arr
          * @param country
          * @param includeChina
@@ -117,30 +132,30 @@ module.exports = {
             let initialRow = [];
             let currentRow = [];
 
-            for (let i = 0; i < arr.length; i++) { // Loops through the entire array
+            for (let i = 1; i < arr.length; i++) { // Loops through the entire array
                 if (country) { // If a country is given
-                    if (includesCountry(arr, i, country)) {
+                    if (utility.includesCountry(arr, i, country)) {
                         if (first) { // The first time this is ran (and hits) we want to update initialRow
-                            initialRow = getRowData(arr, i);
+                            initialRow = utility.getRowData(arr, i);
                             first = false;
                         } else { // All other hits are added on top
-                            currentRow = getRowData(arr, i);
-                            initialRow = sumRows(initialRow, currentRow)
+                            currentRow = utility.getRowData(arr, i);
+                            initialRow = utility.sumRows(initialRow, currentRow);
                         }
                     }
                 } else { // This is either all or other
                     if (includeChina) { // All
-                        initialRow = getRowData(arr, i);
-                        for (let i = 2; i < arr.length; i++) { // Start from index 2 since 0 is format and 1 is initialRow
-                            currentRow = getRowData(arr, i);
-                            initialRow = sumRows(initialRow, currentRow)
+                        initialRow = utility.getRowData(arr, i);
+                        for (let i = 2; i < arr.length; i++) {
+                            currentRow = utility.getRowData(arr, i);
+                            initialRow = utility.sumRows(initialRow, currentRow);
                         }
                     } else { // Other
-                        initialRow = getRowData(arr, i);
-                        for (let i = 2; i < arr.length; i++) { // Start from index 2 since 0 is format and 1 is initialRow
-                            if (!includesCountry(arr, i, 'china')) { // China must not be included in the row
-                                currentRow = getRowData(arr, i);
-                                initialRow = sumRows(initialRow, currentRow);
+                        initialRow = utility.getRowData(arr, i);
+                        for (let i = 2; i < arr.length; i++) {
+                            if (!utility.includesCountry(arr, i, 'china')) { // China must not be included in the row
+                                currentRow = utility.getRowData(arr, i);
+                                initialRow = utility.sumRows(initialRow, currentRow);
                             }
                         }
                     }
@@ -150,219 +165,144 @@ module.exports = {
         }
 
         /**
-         * Sums the values of 2 rows.
-         * @param row1
-         * @param row2
-         * @returns {*}
-         */
-        function sumRows(row1, row2) {
-            for (let i = 0; i < row1.length; i++)
-                row1[i].value += row2[i].value;
-            return row1;
-        }
-
-        /**
-         * Returns true if the passed country is the country of the passed row (uses regex to make sure Australia doesnt get matched if the user inputs us for example).
-         * @param arr
-         * @param index
-         * @param country
-         * @returns {boolean}
-         */
-        function includesCountry(arr, index, country) {
-            let check = "";
-            if (arr[index][0])
-                check += arr[index][0].toLowerCase() + " ";
-            if (arr[index][1])
-                check += arr[index][1].toLowerCase() + " ";
-
-            return check.match(`\\b${country.toLowerCase()}\\b`);
-        }
-
-        /**
-         * Filters out days that have 0 cases.
-         * @param arr
-         * @returns {[]}
-         */
-        function filterCasesEmpty(arr) {
-            let finalArray = [];
-
-            for (let i = 0; i < arr.length; i++)
-                if (arr[i].value !== 0)
-                    finalArray.push(arr[i]);
-
-            return finalArray;
-        }
-
-        /**
-         * Filters out days that have the same amount of cases (keeps the first one).
-         * @param arr
-         * @returns {[]}
-         */
-        function filterCasesDupes(arr) {
-            let finalArray = [];
-
-            for (let i = 0; i < arr.length; i++)
-                if (i === 0)
-                    finalArray.push(arr[i]);
-                else if (arr[i].value !== arr[i - 1].value)
-                    finalArray.push(arr[i]);
-
-            return finalArray;
-        }
-
-        /**
-         * In some cases the CSV file would decrease cases moving onwards which is impossible and quite possible an error, fixing it here.
-         * @param arr
-         * @returns {[]}
-         */
-        function filterCasesDecreasing(arr) {
-            let finalArray = [];
-
-            for (let i = 0; i < arr.length; i++)
-                if (i === 0)
-                    finalArray.push(arr[i]);
-                else if (arr[i].value >= arr[i-1].value)
-                    finalArray.push(arr[i]);
-
-            return finalArray;
-        }
-
-        /**
-         * Converts array into a JSON string and makes it readable for discord.
-         * @param arr
-         * @returns {string}
-         */
-        function discordToString(arr) {
-            return '```JSON\n' + JSON.stringify(arr) + '```';
-        }
-
-        /**
-         * Formats the date appropriately for plot.ly.
-         * @param arr
-         * @returns {[]}
-         */
-        function formatForGraph(arr) {
-            let arrFinal = [];
-
-            for (let i = 0; i < arr.length; i++) {
-                let temp = arr[i].date.split('/');
-                arrFinal.push({
-                    'date': `${temp[2]}-${temp[0]}-${temp[1]}`,
-                    'value': arr[i].value
-                });
-            }
-            return arrFinal;
-        }
-
-        /**
-         * Generates a graph from the given data, exports it as a jpeg file and sends it.
+         * Generates and sends line chart
          * @param arr
          */
         function generateGraph(arr) {
-
             message.channel.startTyping();
 
-            let dates = [];
-            let values = [];
+            const dates = [];
+            const values = [];
 
             for (let i = 0; i < arr.length; i++) {
                 dates.push(arr[i].date);
                 values.push(arr[i].value);
             }
 
-            let chartData = {
-              'backgroundColor': 'white',
-              'width': 1000,
-              'height': 500,
-              'format': 'jpg',
-              'chart': {
-                'type': 'line',
-                'data': {
-                  'labels': dates,
-                  'datasets': [{
-                    'label': 'Number',
-                    'data': values,
-                    'fill': true,
-                  }]
-                }
-              },
+            let dataset;
+
+            if (change) {
+                const valuesChange = utility.getChange(values);
+                dataset = {
+                    label: `${utility.getGraphLabel(country, flag)} (rate of change)`,
+                    data: valuesChange,
+                    fill: true,
+                    backgroundColor: utility.getGraphColor(flag),
+                };
+            } else {
+                dataset = {
+                    label: utility.getGraphLabel(country, flag),
+                    data: values,
+                    fill: true,
+                    backgroundColor: utility.getGraphColor(flag),
+                };
             }
 
-            //post req. with params to create our chrat
+
+            if (values.length === 0) {
+                message.channel.send('There seems to be no data available for your query, please try again!\n\n' +
+            'If your spelling is correct be sure to mention that using' +
+            '``.log [country to fix]`` so I fix it later.');
+                message.channel.stopTyping();
+                return;
+            }
+
+            const chartData = {
+                backgroundColor: 'rgba(44,47,51, 1)',
+                width: 1000,
+                height: 500,
+                format: 'jpg',
+                chart: {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [dataset],
+                    },
+                    options: {
+                        legend: {
+                            labels: {
+                                fontColor: 'white',
+                            },
+                        },
+                    },
+                },
+            };
+
+            // post req. with params to create our chart
             axios({
-              method: 'post',
-              url: 'https://quickchart.io/chart',
-              responseType: 'stream',
-              data: chartData,
+                method: 'post',
+                url: 'https://quickchart.io/chart',
+                responseType: 'stream',
+                data: chartData,
             })
-              .then((res) => {
-                //pipe image into writestream and send image when done
-                res.data.pipe(fs.createWriteStream('1.jpeg'))
-                .on('finish', () => {
-                  message.channel.send({files: ['1.jpeg']}).then(message.channel.stopTyping())
+                .then((res) => {
+                    // pipe image into writestream and send image when done
+                    res.data.pipe(fs.createWriteStream('1.jpeg'))
+                        .on('finish', () => {
+                            message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
+                        });
                 })
-                .on('error', () => {
-                  //if can't convert to pic, do error func here
+                .catch((err) => {
+                    console.error(err);
+                });
+        }
+
+        /**
+         * Generates and sends pie chart
+         * @param objectData
+         */
+        function generatePieChart(objectData) {
+            message.channel.startTyping();
+
+            let labels, values;
+
+            labels = ['% of cases that are still active', '% of cases that recovered', '% of cases that died'];
+            values = [objectData.activeOverConfirmed, objectData.recoveredOverConfirmed, objectData.deadOverConfirmed];
+
+            const chartData = {
+                backgroundColor: 'rgba(44,47,51, 1)',
+                width: 1000,
+                height: 500,
+                format: 'jpg',
+                chart: {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: ['rgba(41, 121, 255, 1)', 'rgba(0, 200, 83, 1)', 'rgba(235, 40, 40, 1)'],
+                        }],
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: `Confirmed cases in ${utility.getGraphPieCountry(country)}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
+                        },
+                        legend: {
+                            labels: {
+                                fontColor: 'white',
+                            },
+                        },
+                    },
+                },
+            };
+
+            axios({
+                method: 'post',
+                url: 'https://quickchart.io/chart',
+                responseType: 'stream',
+                data: chartData,
+            })
+                .then((res) => {
+                    // pipe image into writestream and send image when done
+                    res.data.pipe(fs.createWriteStream('1.jpeg'))
+                        .on('finish', () => {
+                            message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
+                        });
                 })
-              })
-              .catch((err) => {
-                //if can't get web chart, do error func here
-              })
-        }
-
-        /**
-         * Used to generate the curve color based on whether confirmed, deaths or recovered were queried.
-         * @param str
-         * @returns {string}
-         */
-        function setColor(str) {
-            let color = '';
-
-            if (str === 'd')
-                color = "rgba(82, 75, 75, 1)";
-            else if (str === 'r')
-                color = "rgba(36, 221, 23, 1)";
-            else
-                color = "rgba(31, 119, 180, 1)";
-
-            return color;
-        }
-
-        /**
-         * Generates a curve name. Only visible once you start displaying 2 curves in the same graph.
-         * @param str
-         */
-        function setName(str) {
-            let txt = '';
-            if (str === 'd')
-                txt = `Deaths (${country})`;
-            else if (str === 'r')
-                txt = `Recovered (${country})`;
-            else
-                txt = `Confirmed cases (${country})`;
-        }
-
-        function getPopulation(country) {
-            let num = 0;
-            for (let i in population) {
-                if (population[i].country.toLowerCase() === 'greece')
-                    num = population[i].population;
-            }
-            return num;
-        }
-
-        /**
-         *
-         * @param country
-         * @param arr
-         */
-        function populationData(country, arrC) {
-            let msg = '';
-            let pop = getPopulation(country);
-            let confirmedOverPop = (100*arrC[arrC.length - 1].value/pop).toFixed(2);
-
-            msg += `Percentage of the population that has been infected: ${confirmedOverPop}%`;
-            return msg;
+                .catch((err) => {
+                    console.error(err);
+                });
         }
     },
 };

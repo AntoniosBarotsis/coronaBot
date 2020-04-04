@@ -7,11 +7,8 @@ module.exports = {
     usage: '``' + prefix + 'testp``',
     show: false,
     execute(message, args) {
-
-        for (let i in population) {
-            if (population[i].country.toLowerCase() === 'greece')
-                message.channel.send(population[i].population)
+        for (const i in population) {
+            if (population[i].country.toLowerCase() === 'greece') { message.channel.send(population[i].population); }
         }
-
     },
 };

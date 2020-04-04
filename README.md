@@ -1,6 +1,6 @@
 # Covid-19 Discord Bot
 
-A simple discord bot that can query data about confirmed, death and recovered cases regarding covid-19, make plots with that data and use regression to make short term predictions. 
+A simple discord bot that can query data about confirmed, death and recovered cases regarding covid-19 and make plots with that data. 
 
 ## Table of Contents
 
@@ -11,13 +11,13 @@ A simple discord bot that can query data about confirmed, death and recovered ca
 
 ## Installation
 
-You have to make a [Plot.ly](https://chart-studio.plot.ly/feed/#/) account and copy your Api key.
-Download the repository and add a .env file in root containing your bot token, your preferred prefix and your Plotly username and api key.
-If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv_cmd`` in the root directory.
+Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix.
+If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv`` in the root directory (this may or may not work as of now, I'll update 
+this part once I'm done with the bot part).
 
 ## Usage
 
-``[modifier] [country] [pred]``
+``[modifier] [country] [option]``
 
 - modifier
    - c (confirmed cases)
@@ -30,9 +30,13 @@ If you dont want to use a discord bot you can also run the code through your con
     will return you data for all countries combined as well as ``other`` which does the same thing
     minus China.
     
-- pred \
-    Typing ``pred`` at the end of your query will make the program use regression to effectively
-    approximate the number of cases in the near future for the country you inputted.
+- option (optional)
+    - pie\
+        Prints a pie chart (no need for modifier)
+    - change\
+        Returns a chart showing the rate of change
+        
+You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
 ## Support
    
