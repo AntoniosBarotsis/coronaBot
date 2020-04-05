@@ -8,7 +8,7 @@ module.exports = {
     show: true,
     execute(message, args) {
         fs.readFile('data/log.json', (err, json) => {
-            if (err) { console.error(err); }
+            if (err) { console.error(err); json = '{}' }
 
             const currentData = JSON.parse(json);
 
