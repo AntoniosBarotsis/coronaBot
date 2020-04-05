@@ -29,24 +29,26 @@ module.exports = {
             flag = 'c';
         } // Default case
 
-        let country = '';
+        let country = [];
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-            country = country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', '');
+            country[0] = args.join(' ').replace(/,/g, ' ').replace(args[0] + ' ', '');
         } else { // Country isn't polluted by a url modifier.
-            country = country.concat(args).replace(/,/g, ' ');
+            country[0] = args.join(' ').replace(/,/g, ' ');
         }
 
         let pie = false;
         let change = false;
-        let countryP;
+        let countryP = [];
 
-        if (country.includes(' pie')) {
-            country = country.replace(' pie', '');
+        if (country[0].includes(' pie')) {
+            country[0] = country[0].replace(' pie', '');
             pie = true;
-            countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country));
-        } else if (country.includes(' change')) {
-            country = country.replace(' change', '');
+            countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country[0]));
+        } else if (country[0].includes(' change')) {
+            country[0] = country[0].replace(' change', '');
             change = true;
+        } else if (country[0].includes('compare')) {
+            country = country[0].split(' compare ');
         }
 
         country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
@@ -128,21 +130,24 @@ module.exports = {
          * @returns {[]}
          */
         function sumCases(arr, country, includeChina) {
-            let first = true;
+            let first = [true, true];
             let initialRow = [];
             let currentRow = [];
 
             for (let i = 1; i < arr.length; i++) { // Loops through the entire array
                 if (country) { // If a country is given
-                    if (utility.includesCountry(arr, i, country)) {
-                        if (first) { // The first time this is ran (and hits) we want to update initialRow
-                            initialRow = utility.getRowData(arr, i);
-                            first = false;
-                        } else { // All other hits are added on top
-                            currentRow = utility.getRowData(arr, i);
-                            initialRow = utility.sumRows(initialRow, currentRow);
+                    for (let j in country) {
+                        if (utility.includesCountry(arr, i, country[j])) {
+                            if (first[j]) { // The first time this is ran (and hits) we want to update initialRow
+                                initialRow[j] = utility.getRowData(arr, i);
+                                first[j] = false;
+                            } else { // All other hits are added on top
+                                currentRow[j] = utility.getRowData(arr, i);
+                                initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
+                            }
                         }
                     }
+                    // console.log(initialRow[0]);
                 } else { // This is either all or other
                     if (includeChina) { // All
                         initialRow = utility.getRowData(arr, i);

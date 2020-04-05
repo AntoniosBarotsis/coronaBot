@@ -21,18 +21,18 @@ function getChange(arr) {
  * @param knownCountry
  * @returns {string|*}
  */
-function replaceKnownCountry(knownCountry) {
-    if (knownCountry.toLowerCase() === 'vatican') {
-        return 'holy see';
-    } else if (knownCountry.toLowerCase() === 'usa') {
-        return 'US';
-    } else if (knownCountry.toLowerCase() === 'uk') {
-        return 'united kingdom';
-    } else if (knownCountry.toLowerCase() === 'south korea') {
-        return 'korea';
-    } else {
-        return knownCountry;
+function replaceKnownCountry(country) {
+    for (let i in country) {
+        if (country[i].toLowerCase() === 'vatican')
+            country[i] = 'holy see';
+        else if (country[i].toLowerCase() === 'usa')
+            country[i] = 'US';
+        else if (country[i].toLowerCase() === 'uk')
+            country[i] = 'united kingdom';
+        else if (country[i].toLowerCase() === 'south korea')
+            country[i] = 'korea';
     }
+    return country;
 }
 
 /**
@@ -80,15 +80,17 @@ function getGraphColor(flag) {
  * @returns {[]}
  */
 function formatForGraph(arr) {
-    const arrFinal = [];
-
+    const arrFinal = [[]];
     for (let i = 0; i < arr.length; i++) {
-        const temp = arr[i].date.split('/');
-        arrFinal.push({
-            date: `${temp[2]}-${temp[0]}-${temp[1]}`,
-            value: arr[i].value,
-        });
+        for (let j = 0; j < arr[i].length; j++) {
+            const temp = arr[i][j].date.split('/');
+            arrFinal[i].push({
+                date: `${temp[2]}-${temp[0]}-${temp[1]}`,
+                value: arr[i][j].value,
+            });
+        }
     }
+
     return arrFinal;
 }
 
@@ -98,13 +100,15 @@ function formatForGraph(arr) {
  * @returns {[]}
  */
 function filterCasesDecreasing(arr) {
-    const finalArray = [];
+    const finalArray = [[]];
 
     for (let i = 0; i < arr.length; i++) {
-        if (i === 0) {
-            finalArray.push(arr[i]);
-        } else if (arr[i].value >= arr[i - 1].value) {
-            finalArray.push(arr[i]);
+        for (let j = 0; j < arr[i].length; j++) {
+            if (j === 0) {
+                finalArray[i].push(arr[i][j]);
+            } else if (arr[i][j].value >= arr[i][j - 1].value) {
+                finalArray[i].push(arr[i][j]);
+            }
         }
     }
 
@@ -117,13 +121,15 @@ function filterCasesDecreasing(arr) {
  * @returns {[]}
  */
 function filterCasesDupes(arr) {
-    const finalArray = [];
+    const finalArray = [[]];
 
     for (let i = 0; i < arr.length; i++) {
-        if (i === 0) {
-            finalArray.push(arr[i]);
-        } else if (arr[i].value !== arr[i - 1].value) {
-            finalArray.push(arr[i]);
+        for (let j = 0; j < arr[i].length; j++) {
+            if (j === 0) {
+                finalArray[i].push(arr[i][j]);
+            } else if (arr[i][j].value !== arr[i][j - 1].value) {
+                finalArray[i].push(arr[i][j]);
+            }
         }
     }
 
@@ -136,11 +142,13 @@ function filterCasesDupes(arr) {
  * @returns {[]}
  */
 function filterCasesEmpty(arr) {
-    const finalArray = [];
+    const finalArray = [[]];
 
     for (let i = 0; i < arr.length; i++) {
-        if (arr[i].value !== 0) {
-            finalArray.push(arr[i]);
+        for (let j = 0; j < arr[i].length; j++) {
+            if (arr[i][j].value !== 0) {
+                finalArray[i].push(arr[i][j]);
+            }
         }
     }
 
@@ -305,9 +313,10 @@ function replaceKnownCountryPie(country) {
 function removeMaliciousChars(country) {
     let maliciousChars = '[](){}<>-\\/|?!;^$.&*+';
 
-    for (let i in maliciousChars)
-        if (country.includes(maliciousChars[i]))
-            country = country.split(maliciousChars[i]).join('');
+    for (let i in country)
+        for (let j in maliciousChars)
+            if (country[i].includes(maliciousChars[j]))
+                country[i] = country[i].split(maliciousChars[j]).join('');
 
     return country;
 }
