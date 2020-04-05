@@ -38,7 +38,9 @@ module.exports = {
 
         let pie = false;
         let change = false;
+        let compare = false;
         let countryP;
+        let countryC;
 
         if (country.includes(' pie')) {
             country = country.replace(' pie', '');
@@ -49,7 +51,14 @@ module.exports = {
             change = true;
         }
 
-        country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
+        if (country.includes(' compare ')) {
+            country = country.split(' compare ');
+            compare = true;
+            countryC = utility.replaceKnownCountryCompare(utility.removeMaliciousCharsCompare(country));
+            return;
+        } else
+            country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
+
 
         const urlData = [];
 
@@ -72,6 +81,8 @@ module.exports = {
                 let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
                     arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
                 generatePieChart(populationData);
+            } else if (compare) {
+
             } else {
                 if (flag === 'd')
                     generateGraph(arr[1]);
@@ -134,13 +145,15 @@ module.exports = {
 
             for (let i = 1; i < arr.length; i++) { // Loops through the entire array
                 if (country) { // If a country is given
-                    if (utility.includesCountry(arr, i, country)) {
-                        if (first) { // The first time this is ran (and hits) we want to update initialRow
-                            initialRow = utility.getRowData(arr, i);
-                            first = false;
-                        } else { // All other hits are added on top
-                            currentRow = utility.getRowData(arr, i);
-                            initialRow = utility.sumRows(initialRow, currentRow);
+                    for (let j in country) {
+                        if (utility.includesCountry(arr, i, country[j])) {
+                            if (first) { // The first time this is ran (and hits) we want to update initialRow
+                                initialRow = utility.getRowData(arr, i);
+                                first = false;
+                            } else { // All other hits are added on top
+                                currentRow = utility.getRowData(arr, i);
+                                initialRow = utility.sumRows(initialRow, currentRow);
+                            }
                         }
                     }
                 } else { // This is either all or other
