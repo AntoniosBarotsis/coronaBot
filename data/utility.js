@@ -1,6 +1,6 @@
 module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie, removeMaliciousChars, replaceKnownCountryCompare, removeMaliciousCharsCompare};
+    replaceKnownCountryPie, removeMaliciousChars};
 
 /**
  * Returns difference per array index
@@ -22,35 +22,17 @@ function getChange(arr) {
  * @returns {string|*}
  */
 function replaceKnownCountry(knownCountry) {
-    if (knownCountry.toLowerCase() === 'vatican')
+    if (knownCountry.toLowerCase() === 'vatican') {
         return 'holy see';
-    else if (knownCountry.toLowerCase() === 'usa')
+    } else if (knownCountry.toLowerCase() === 'usa') {
         return 'US';
-    else if (knownCountry.toLowerCase() === 'uk')
+    } else if (knownCountry.toLowerCase() === 'uk') {
         return 'united kingdom';
-    else if (knownCountry.toLowerCase() === 'south korea')
+    } else if (knownCountry.toLowerCase() === 'south korea') {
         return 'korea';
-    else
+    } else {
         return knownCountry;
-}
-
-function replaceKnownCountryCompare(countries) {
-    let knownCountries = [];
-
-    for (let i in countries) {
-        if (countries[i].toLowerCase() === 'vatican')
-            knownCountries[i] = 'holy see';
-        else if (countries[i].toLowerCase() === 'usa')
-            knownCountries[i] = 'US';
-        else if (countries[i].toLowerCase() === 'uk')
-            knownCountries[i] = 'united kingdom';
-        else if (countries[i].toLowerCase() === 'south korea')
-            knownCountries[i] = 'korea';
-        else
-            knownCountries[i] = countries[i];
     }
-
-    return knownCountries;
 }
 
 /**
@@ -328,15 +310,4 @@ function removeMaliciousChars(country) {
             country = country.split(maliciousChars[i]).join('');
 
     return country;
-}
-
-function removeMaliciousCharsCompare(countries) {
-    let maliciousChars = '[](){}<>-\\/|?!;^$.&*+';
-
-    for (let i in countries)
-        for (let j in maliciousChars)
-            if (countries[i].includes(maliciousChars[j]))
-                countries[i] = countries[i].split(maliciousChars[j]).join('');
-
-    return countries;
 }
