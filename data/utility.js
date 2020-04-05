@@ -101,7 +101,7 @@ function formatForGraph(arr) {
  * @returns {[]}
  */
 function filterCasesDecreasing(arr) {
-    const finalArray = [];
+    const finalArray = [[]];
 
     for (let i = 0; i < arr.length; i++) {
         finalArray.push([]);
@@ -123,7 +123,7 @@ function filterCasesDecreasing(arr) {
  * @returns {[]}
  */
 function filterCasesDupes(arr) {
-    const finalArray = [];
+    const finalArray = [[]];
 
     for (let i = 0; i < arr.length; i++) {
         finalArray.push([]);
@@ -145,7 +145,7 @@ function filterCasesDupes(arr) {
  * @returns {[]}
  */
 function filterCasesEmpty(arr) {
-    const finalArray = [];
+    const finalArray = [[]];
 
     for (let i = 0; i < arr.length; i++) {
         finalArray.push([]);
