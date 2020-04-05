@@ -20,6 +20,11 @@ module.exports = {
         ' - change: Returns a line chart showing the rate of change or the corresponding modifier',
     show: true,
     execute: function(message, args) {
+        if (args.length === 0) {
+            message.channel.send('Please specify a country using ``.cv [country]``.');
+            return;
+        }
+
         let flag;
 
         // Check if args[0] is r or d, else apply c (default).
