@@ -74,9 +74,11 @@ module.exports = {
             // Confirmed country 1: arr[0][0]
             // Date 1 of confirmed country 1 arr[0][0][0]
 
-            console.log(arr[0])
             return;
             if (pie) {
+                // Create an array with the populations
+                
+
                 let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
                     arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
                 generatePieChart(populationData);
