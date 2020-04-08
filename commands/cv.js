@@ -90,7 +90,7 @@ module.exports = {
                 else
                     generateGraph(arr[0]);
             }
-        });
+        }).catch(err => console.error(err));
 
         function getData(source) {
             /**

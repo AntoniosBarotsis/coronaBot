@@ -1,6 +1,8 @@
 module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie, removeMaliciousChars};
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate};
+
+const fs = require('fs');
 
 /**
  * Returns difference per array index
@@ -324,4 +326,36 @@ function removeMaliciousChars(country) {
                 country[i] = country[i].split(maliciousChars[j]).join('');
 
     return country;
+}
+
+function shouldRefreshFile(fileDate) {
+    let today = new Date();
+
+    if (fileDate.month < today.getMonth() || fileDate.day < today.getDay())
+        return true;
+    else return today.getHours() - fileDate.hour >= 6;
+
+}
+
+function getFileDate(path) {
+    return new Promise(function(resolve) {
+        // './commands/downloads/output.csv'
+        fs.open(path, 'r', (err, fd) => {
+            if (err) throw err;
+
+            fs.fstat(fd, (err, stat) => {
+                if (err) throw err;
+
+                fs.close(fd, (err) => {
+                    if (err) throw err;
+                });
+
+                resolve({
+                    month: stat.mtime.getMonth(),
+                    day: stat.mtime.getDay(),
+                    hour: stat.mtime.getHours(),
+                });
+            });
+        });
+    });
 }
