@@ -34,8 +34,14 @@ module.exports = {
             });
         }
 
-
         let downloads = [download(confirmed, 'confirmed'), download(recovered, 'recovered'), download(deaths, 'deaths')];
+
+        if (utility.shouldRefreshFile(utility.getFileDate('./commands/downloads/confirmed.csv'))) {
+            downloads.unshift(download(confirmed, 'confirmed'));
+            downloads.unshift(download(deaths, 'deaths'));
+            downloads.unshift(download(recovered, 'recovered'));
+            console.log('Downloaded files');
+        }
 
         Promise.all(downloads).then(() => {
             let confirmedInitArray = fs.readFileSync(confirmedFile, 'UTF-8').split('\n');
