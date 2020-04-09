@@ -288,10 +288,11 @@ describe('removeMaliciousChars', () => {
 });
 
 describe('shouldRefreshFile', () => {
+    // Month and Day need to be incremented
     it('file was created a month ago should refresh', async() => {
         let today = new Date();
         let value = {
-            month: today.getMonth() - 1,
+            month: today.getMonth(),
             day: today.getDay(),
             hour: today.getHours(),
         };
@@ -301,7 +302,7 @@ describe('shouldRefreshFile', () => {
     it('file was created a day ago should refresh', async() => {
         let today = new Date();
         let value = {
-            month: today.getMonth(),
+            month: today.getMonth() + 1,
             day: today.getDay() - 1,
             hour: today.getHours(),
         };
@@ -311,7 +312,7 @@ describe('shouldRefreshFile', () => {
     it('file was created 6 hours ago should refresh', async() => {
         let today = new Date();
         let value = {
-            month: today.getMonth(),
+            month: today.getMonth() + 1,
             day: today.getDay(),
             hour: today.getHours() - 6,
         };
@@ -321,8 +322,8 @@ describe('shouldRefreshFile', () => {
     it('file was created less than 6 hours ago should not refresh', async() => {
         let today = new Date();
         let value = {
-            month: today.getMonth(),
-            day: today.getDay(),
+            month: today.getMonth() + 1,
+            day: today.getDate(),
             hour: today.getHours() - 5,
         };
         expect(utility.shouldRefreshFile(value)).toBe(false);

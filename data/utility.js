@@ -331,7 +331,7 @@ function removeMaliciousChars(country) {
 function shouldRefreshFile(fileDate) {
     let today = new Date();
 
-    if (fileDate.month < today.getMonth() || fileDate.day < today.getDay())
+    if (fileDate.month < today.getMonth() + 1 || fileDate.day < today.getDate())
         return true;
     else return today.getHours() - fileDate.hour >= 6;
 
@@ -351,9 +351,10 @@ function getFileDate(path) {
                 });
 
                 resolve({
-                    month: stat.mtime.getMonth(),
-                    day: stat.mtime.getDay(),
+                    month: stat.mtime.getMonth() + 1,
+                    day: stat.mtime.getDate(),
                     hour: stat.mtime.getHours(),
+                    minute: stat.mtime.getMinutes(),
                 });
             });
         });

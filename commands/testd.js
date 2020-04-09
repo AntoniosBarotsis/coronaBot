@@ -4,6 +4,7 @@ const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
+const utility = require('./../data/utility');
 
 module.exports = {
     name: 'testd',
@@ -11,10 +12,14 @@ module.exports = {
     show: false,
     execute(message, args) {
 
-        async function download() {
-            const url = confirmed;
-            const imagepath = path.resolve(__dirname, 'downloads', 'output.csv');
-            const writer = fs.createWriteStream(imagepath);
+
+        let confirmedFile = './commands/downloads/confirmed.csv';
+        let recoveredFile = './commands/downloads/recovered.csv';
+        let deathsFile = './commands/downloads/deaths.csv';
+
+        async function download(url, str) {
+            const filePath = path.resolve(__dirname, 'downloads', `${str}.csv`);
+            const writer = fs.createWriteStream(filePath);
             const response = await axios({
                 url: url,
                 method: 'GET',
@@ -29,38 +34,23 @@ module.exports = {
             });
         }
 
-        function shouldRefreshFile(fileDate) {
-            let today = new Date();
 
-            if (fileDate.month < today.getMonth() || fileDate.day < today.getDay())
-                return true;
-            else return today.getHours() - fileDate.hour >= 6;
+        let downloads = [download(confirmed, 'confirmed'), download(recovered, 'recovered'), download(deaths, 'deaths')];
 
-        }
-        function getFileDate() {
-            let result;
+        Promise.all(downloads).then(() => {
+            let confirmedInitArray = fs.readFileSync(confirmedFile, 'UTF-8').split('\n');
+            let recoveredInitArray = fs.readFileSync(recoveredFile, 'UTF-8').split('\n');
+            let deathsInitArray = fs.readFileSync(deathsFile, 'UTF-8').split('\n');
+            console.log(confirmedInitArray[1].split(','));
+        });
 
-            fs.open('./commands/downloads/output.csv', 'r', (err, fd) => {
-                if (err) throw err;
-                fs.fstat(fd, (err, stat) => {
-                    if (err) throw err;
 
-                    let fileTime = {
-                        month: stat.mtime.getMonth(),
-                        day: stat.mtime.getDay(),
-                        hour: stat.mtime.getHours(),
-                    };
+        //
+        // utility.getFileDate('./commands/downloads/output.csv').then(value => {
+        //     console.log(value);
+        // });
 
-                    shouldRefreshFile(fileTime);
 
-                    fs.close(fd, (err) => {
-                        if (err) throw err;
-                    });
-                });
-            });
-            return result;
-        }
-        // download();
         // getFileDate();
     },
 };
