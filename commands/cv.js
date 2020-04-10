@@ -74,21 +74,21 @@ module.exports = {
             // Confirmed country 1: arr[0][0]
             // Date 1 of confirmed country 1 arr[0][0][0]
 
-            return;
+            // console.log(arr[0][0])
+            // return;
             if (pie) {
                 // Create an array with the populations
-                
 
                 let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
                     arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
                 generatePieChart(populationData);
             } else {
                 if (flag === 'd')
-                    generateGraph(arr[1]);
+                    generateGraph(arr[1][0]);
                 else if (flag === 'r')
-                    generateGraph(arr[2]);
+                    generateGraph(arr[2][0]);
                 else
-                    generateGraph(arr[0]);
+                    generateGraph(arr[0][0]);
             }
         }).catch(err => console.error(err));
 
@@ -155,7 +155,6 @@ module.exports = {
                             }
                         }
                     }
-                    // console.log(initialRow[0]);
                 } else { // This is either all or other
                     if (includeChina) { // All
                         initialRow = utility.getRowData(arr, i);
@@ -204,7 +203,7 @@ module.exports = {
                 };
             } else {
                 dataset = {
-                    label: utility.getGraphLabel(country, flag),
+                    label: utility.getGraphLabel(country[0], flag),
                     data: values,
                     fill: true,
                     backgroundColor: utility.getGraphColor(flag),
