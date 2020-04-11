@@ -79,10 +79,8 @@ module.exports = {
             // console.log(arr[0][0])
             // return;
             if (pie) {
-                // Create an array with the populations
-
-                let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
-                    arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
+                let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
+                    arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
                 generatePieChart(populationData);
             } else {
                 if (flag === 'd')
@@ -106,7 +104,7 @@ module.exports = {
                     .CSVParse() // parses it (csv format)
                     .consume(object => rows.push(object)) // pushes everything into rows[]
                     .then(() => {
-                        const arr = searchRow(rows, (country)); // Generates the array we want
+                        const arr = sumCases(rows, (country)); // Generates the array we want
                         // eslint-disable-next-line max-len
                         const finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
                         resolve(finalArray);
@@ -117,36 +115,37 @@ module.exports = {
         }
 
         /**
-         * Calls sumCases with the appropriate arguments
-         * @param data
-         * @param country
-         * @returns {*[]}
-         */
-        function searchRow(data, country) {
-            if (country === 'all') {
-                return sumCases(data, null, true);
-            } else if (country === 'other') {
-                return sumCases(data, null, false);
-            } else {
-                return sumCases(data, country, true);
-            }
-        }
-
-        /**
          * Sums rows in case there are multiple mentions of them (for example China) as well as all and other cases
          * @param arr
          * @param country
-         * @param includeChina
          * @returns {[]}
          */
-        function sumCases(arr, country, includeChina) {
+        function sumCases(arr, country) {
             let first = [true, true];
             let initialRow = [];
             let currentRow = [];
 
             for (let i = 1; i < arr.length; i++) { // Loops through the entire array
-                if (country) { // If a country is given
-                    for (let j in country) {
+                for (let j in country) {
+                    if (country[j] === 'all') {
+                        if (first[j]) {
+                            initialRow[j] = utility.getRowData(arr, i);
+                            first[j] = false;
+                        } else {
+                            currentRow[j] = utility.getRowData(arr, i);
+                            initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
+                        }
+                    } else if (country[j] === 'other') {
+                        if (!utility.includesCountry(arr, i, 'china')) {
+                            if (first[j]) { // The first time this is ran (and hits) we want to update initialRow
+                                initialRow[j] = utility.getRowData(arr, i);
+                                first[j] = false;
+                            } else { // All other hits are added on top
+                                currentRow[j] = utility.getRowData(arr, i);
+                                initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
+                            }
+                        }
+                    } else {
                         if (utility.includesCountry(arr, i, country[j])) {
                             if (first[j]) { // The first time this is ran (and hits) we want to update initialRow
                                 initialRow[j] = utility.getRowData(arr, i);
@@ -157,23 +156,23 @@ module.exports = {
                             }
                         }
                     }
-                } else { // This is either all or other
-                    if (includeChina) { // All
-                        initialRow = utility.getRowData(arr, i);
-                        for (let i = 2; i < arr.length; i++) {
-                            currentRow = utility.getRowData(arr, i);
-                            initialRow = utility.sumRows(initialRow, currentRow);
-                        }
-                    } else { // Other
-                        initialRow = utility.getRowData(arr, i);
-                        for (let i = 2; i < arr.length; i++) {
-                            if (!utility.includesCountry(arr, i, 'china')) { // China must not be included in the row
-                                currentRow = utility.getRowData(arr, i);
-                                initialRow = utility.sumRows(initialRow, currentRow);
-                            }
-                        }
-                    }
                 }
+                // } else { // This is either all or other
+                //     if (includeChina) { // All
+                //         initialRow = utility.getRowData(arr, i);
+                //         for (let i = 2; i < arr.length; i++) {
+                //             currentRow = utility.getRowData(arr, i);
+                //             initialRow = utility.sumRows(initialRow, currentRow);
+                //         }
+                //     } else { // Other
+                //         initialRow = utility.getRowData(arr, i);
+                //         for (let i = 2; i < arr.length; i++) {
+                //             if (!utility.includesCountry(arr, i, 'china')) { // China must not be included in the row
+                //                 currentRow = utility.getRowData(arr, i);
+                //                 initialRow = utility.sumRows(initialRow, currentRow);
+                //             }
+                //         }
+                //     }
             }
             return initialRow;
         }
@@ -211,17 +210,33 @@ module.exports = {
 
                 datasets.push(dataset);
             } else if (compare){
+                dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
+
+                if (values[0].length > values[1].length) {
+                    let difference = values[0].length - values[1].length;
+                    for (let i = 0; i < difference; i++) {
+                        values[1].unshift(0);
+                    }
+                } else if (values[0].length < values[1].length) {
+                    let difference = values[1].length - values[0].length;
+                    for (let i = 0; i < difference; i++) {
+                        values[0].unshift(0);
+                    }
+                }
+                // console.log(values[0].length, values[1].length, values[0].length - values[1].length);
                 dataset = {
                     label: utility.getGraphLabel(country[0], flag),
                     data: values[0],
-                    fill: true,
+                    fill: false,
                     backgroundColor: utility.getGraphColor(flag),
+                    borderColor: utility.getGraphColor(flag),
                 };
                 dataset2 = {
                     label: utility.getGraphLabel(country[1], flag),
                     data: values[1],
-                    fill: true,
+                    fill: false,
                     backgroundColor: utility.getGraphColor2(flag),
+                    borderColor: utility.getGraphColor2(flag),
                 };
 
                 datasets.push(dataset);
@@ -315,7 +330,7 @@ module.exports = {
                     options: {
                         title: {
                             display: true,
-                            text: `Confirmed cases in ${utility.getGraphPieCountry(country)}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
+                            text: `Confirmed cases in ${utility.getGraphPieCountry(country[0])}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
                         },
                         legend: {
                             labels: {

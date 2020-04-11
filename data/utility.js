@@ -85,7 +85,7 @@ function getGraphColor2(flag) {
     if (flag === 'r') {
         return 'rgb(0,140,64)';
     } else if (flag === 'd') {
-        return 'rgb(157,30,30)';
+        return 'rgb(124,31,31)';
     } else {
         return 'rgb(30,78,155)';
     }
