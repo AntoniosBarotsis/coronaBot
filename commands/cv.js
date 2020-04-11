@@ -38,6 +38,7 @@ module.exports = {
 
         let pie = false;
         let change = false;
+        let compare = false;
         let countryP = [];
 
         if (country[0].includes(' pie')) {
@@ -49,6 +50,7 @@ module.exports = {
             change = true;
         } else if (country[0].includes('compare')) {
             country = country[0].split(' compare ');
+            compare = true;
         }
 
         country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
@@ -84,11 +86,11 @@ module.exports = {
                 generatePieChart(populationData);
             } else {
                 if (flag === 'd')
-                    generateGraph(arr[1][0]);
+                    generateGraph(arr[1]);
                 else if (flag === 'r')
-                    generateGraph(arr[2][0]);
+                    generateGraph(arr[2]);
                 else
-                    generateGraph(arr[0][0]);
+                    generateGraph(arr[0]);
             }
         }).catch(err => console.error(err));
 
@@ -187,27 +189,52 @@ module.exports = {
             const values = [];
 
             for (let i = 0; i < arr.length; i++) {
-                dates.push(arr[i].date);
-                values.push(arr[i].value);
+                dates[i] = [];
+                values[i] = [];
+                for (let j = 0; j < arr[i].length; j++) {
+                    dates[i].push(arr[i][j].date);
+                    values[i].push(arr[i][j].value);
+                }
             }
 
-            let dataset;
+            let datasets = [];
+            let dataset, dataset2;
 
             if (change) {
-                const valuesChange = utility.getChange(values);
+                const valuesChange = utility.getChange(values[0]);
                 dataset = {
-                    label: `${utility.getGraphLabel(country, flag)} (rate of change)`,
+                    label: `${utility.getGraphLabel(country[0], flag)} (rate of change)`,
                     data: valuesChange,
                     fill: true,
                     backgroundColor: utility.getGraphColor(flag),
                 };
-            } else {
+
+                datasets.push(dataset);
+            } else if (compare){
                 dataset = {
                     label: utility.getGraphLabel(country[0], flag),
-                    data: values,
+                    data: values[0],
                     fill: true,
                     backgroundColor: utility.getGraphColor(flag),
                 };
+                dataset2 = {
+                    label: utility.getGraphLabel(country[1], flag),
+                    data: values[1],
+                    fill: true,
+                    backgroundColor: utility.getGraphColor2(flag),
+                };
+
+                datasets.push(dataset);
+                datasets.push(dataset2);
+            } else {
+                dataset = {
+                    label: utility.getGraphLabel(country[0], flag),
+                    data: values[0],
+                    fill: true,
+                    backgroundColor: utility.getGraphColor(flag),
+                };
+
+                datasets.push(dataset);
             }
 
 
@@ -227,8 +254,8 @@ module.exports = {
                 chart: {
                     type: 'line',
                     data: {
-                        labels: dates,
-                        datasets: [dataset],
+                        labels: dates[0],
+                        datasets: datasets,
                     },
                     options: {
                         legend: {

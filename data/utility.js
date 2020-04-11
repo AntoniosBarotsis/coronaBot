@@ -1,4 +1,4 @@
-module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, formatForGraph, filterCasesDecreasing,
+module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
     replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate};
 
@@ -73,6 +73,21 @@ function getGraphColor(flag) {
         return 'rgba(235, 40, 40, 1)';
     } else {
         return 'rgba(41, 121, 255, 1)';
+    }
+}
+
+/**
+ * Returns appropriate color based on the flag
+ * @param flag
+ * @returns {string}
+ */
+function getGraphColor2(flag) {
+    if (flag === 'r') {
+        return 'rgb(0,140,64)';
+    } else if (flag === 'd') {
+        return 'rgb(157,30,30)';
+    } else {
+        return 'rgb(30,78,155)';
     }
 }
 
