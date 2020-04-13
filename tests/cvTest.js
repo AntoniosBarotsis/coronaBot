@@ -1,52 +1,60 @@
 const util = require('./file.util');
-const library = require('./../data/utility');
+const utility = require('./../data/utility');
 
 let obj = [
-    {
-        date: '1/22/20',
-        value: 0,
-    },
+    [
+        {
+            date: '1/22/20',
+            value: 0,
+        },
+    ],
 ];
 
 let obj2 = [
-    {
-        date: '1/22/20',
-        value: 0,
-    },
-    {
-        date: '1/23/20',
-        value: 1,
-    },
+    [
+        {
+            date: '1/22/20',
+            value: 0,
+        },
+        {
+            date: '1/23/20',
+            value: 1,
+        },
+    ],
 ];
 
 let obj3 = [
-    {
-        date: '1/22/20',
-        value: 1,
-    },
-    {
-        date: '1/23/20',
-        value: 0,
-    },
+    [
+        {
+            date: '1/22/20',
+            value: 1,
+        },
+        {
+            date: '1/23/20',
+            value: 0,
+        },
+    ],
 ];
 
 let obj4 = [
-    {
-        date: '1/22/20',
-        value: 1,
-    },
-    {
-        date: '1/23/20',
-        value: 2,
-    },
-    {
-        date: '1/24/20',
-        value: 2,
-    },
-    {
-        date: '1/25/20',
-        value: 3,
-    },
+    [
+        {
+            date: '1/22/20',
+            value: 1,
+        },
+        {
+            date: '1/23/20',
+            value: 2,
+        },
+        {
+            date: '1/24/20',
+            value: 2,
+        },
+        {
+            date: '1/25/20',
+            value: 3,
+        },
+    ],
 ];
 
 it('Command is found', async() => {
@@ -56,152 +64,220 @@ it('Command is found', async() => {
 });
 
 it('getChange', async() => {
-    expect(library.getChange([0, 2, 3, 1, 9]))
+    expect(utility.getChange([0, 2, 3, 1, 9]))
         .toStrictEqual([0, 2, 1, -2, 8]);
 });
 
 describe('replaceKnownCountry', () => {
 
     it('Korea', async() => {
-        expect(library.replaceKnownCountry('south korea')).toBe('korea');
+        expect(utility.replaceKnownCountry(['south korea'])).toStrictEqual(['korea']);
     });
 
     it('Random country', async() => {
-        expect(library.replaceKnownCountry('greece')).toBe('greece');
+        expect(utility.replaceKnownCountry(['greece'])).toStrictEqual(['greece']);
     });
 
     it('Vatican', async() => {
-        expect(library.replaceKnownCountry('vatican')).toBe('holy see');
+        expect(utility.replaceKnownCountry(['vatican'])).toStrictEqual(['holy see']);
     });
 
     it('UK', async() => {
-        expect(library.replaceKnownCountry('uk')).toBe('united kingdom');
+        expect(utility.replaceKnownCountry(['uk'])).toStrictEqual(['united kingdom']);
     });
 });
 
 describe('getGraphLabel', () => {
     it('No flag', async() => {
-        expect(library.getGraphLabel('greece', '')).toBe('Confirmed cases in Greece');
+        expect(utility.getGraphLabel('greece', '')).toBe('Confirmed cases in Greece');
     });
 
     it('No country', async() => {
-        expect(library.getGraphLabel('', 'c')).toBe('Confirmed cases in ');
+        expect(utility.getGraphLabel('', 'c')).toBe('Confirmed cases in ');
     });
 
     it('No flag or country', async() => {
-        expect(library.getGraphLabel('', '')).toBe('Confirmed cases in ');
+        expect(utility.getGraphLabel('', '')).toBe('Confirmed cases in ');
     });
 
     it('Recovered', async() => {
-        expect(library.getGraphLabel('greece', 'r')).toBe('Recovered cases in Greece');
+        expect(utility.getGraphLabel('greece', 'r')).toBe('Recovered cases in Greece');
     });
 
     it('Deaths', async() => {
-        expect(library.getGraphLabel('greece', 'd')).toBe('Deaths in Greece');
+        expect(utility.getGraphLabel('greece', 'd')).toBe('Deaths in Greece');
     });
 });
 
 describe('getGraphColor', () => {
     it('Confirmed', async() => {
-        expect(library.getGraphColor('c')).toBe('rgba(41, 121, 255, 1)');
+        expect(utility.getGraphColor('c')).toBe('rgba(41, 121, 255, 1)');
     });
 
     it('Empty', async() => {
-        expect(library.getGraphColor('')).toBe('rgba(41, 121, 255, 1)');
+        expect(utility.getGraphColor('')).toBe('rgba(41, 121, 255, 1)');
     });
 
     it('Recovered', async() => {
-        expect(library.getGraphColor('r')).toBe('rgba(0, 200, 83, 1)');
+        expect(utility.getGraphColor('r')).toBe('rgba(0, 200, 83, 1)');
     });
 
     it('Deaths', async() => {
-        expect(library.getGraphColor('d')).toBe('rgba(235, 40, 40, 1)');
+        expect(utility.getGraphColor('d')).toBe('rgba(235, 40, 40, 1)');
     });
 });
 
 describe('formatForGraph', () => {
     it('One date', () => {
-        expect(library.formatForGraph(obj)).toStrictEqual([{date: '20-1-22', value: 0}]);
+        expect(utility.formatForGraph(obj)).toStrictEqual([[{date: '20-1-22', value: 0}]]);
     });
 
     it('Empty', () => {
-        expect(library.formatForGraph([])).toStrictEqual([]);
+        expect(utility.formatForGraph([[]])).toStrictEqual([[]]);
     });
 
     it('2 Dates', () => {
-        expect(library.formatForGraph(obj2)).toStrictEqual([{date: '20-1-22', value: 0}, {date: '20-1-23', value: 1}]);
+        expect(utility.formatForGraph(obj2)).toStrictEqual([[{date: '20-1-22', value: 0}, {date: '20-1-23', value: 1}]]);
     });
 });
 
 describe('filterCasesDecreasing', () => {
     it('No decrease', async() => {
-        expect(library.formatForGraph(library.filterCasesDecreasing(obj2)))
-            .toStrictEqual([{date: '20-1-22', value: 0}, {date: '20-1-23', value: 1}]);
+        expect(utility.formatForGraph(utility.filterCasesDecreasing(obj2)))
+            .toStrictEqual([[{date: '20-1-22', value: 0}, {date: '20-1-23', value: 1}]]);
     });
 
     it('Swap', async() => {
-        expect(library.formatForGraph(library.filterCasesDecreasing(obj3)))
-            .toStrictEqual([{date: '20-1-22', value: 1}]);
+        expect(utility.formatForGraph(utility.filterCasesDecreasing(obj3)))
+            .toStrictEqual([[{date: '20-1-22', value: 1}]]);
     });
 
     it('Empty', async() => {
-        expect(library.filterCasesDecreasing([]))
-            .toStrictEqual([]);
+        expect(utility.filterCasesDecreasing([[]]))
+            .toStrictEqual([[]]);
     });
 });
 
 describe('filterCasesDupes', () => {
     it('One duplicate', async() => {
-        expect(library.formatForGraph(library.filterCasesDupes(obj4)))
-            .toStrictEqual([{date: '20-1-22', value: 1}, {date: '20-1-23', value: 2}, {date: '20-1-25', value: 3}]);
+        expect(utility.formatForGraph(utility.filterCasesDupes(obj4)))
+            .toStrictEqual([[{date: '20-1-22', value: 1}, {date: '20-1-23', value: 2}, {date: '20-1-25', value: 3}]]);
     });
 
     it('No duplicates', async() => {
-        expect(library.filterCasesDupes(obj3))
+        expect(utility.filterCasesDupes(obj3))
             .toStrictEqual(obj3);
     });
 
     it('Empty', async() => {
-        expect(library.filterCasesDupes([]))
-            .toStrictEqual([]);
+        expect(utility.filterCasesDupes([[]]))
+            .toStrictEqual([[]]);
     });
 });
 
 describe('filterCasesEmpty', () => {
     it('Empty', async() => {
-        expect(library.filterCasesEmpty([])).toStrictEqual([]);
+        expect(utility.filterCasesEmpty([[]])).toStrictEqual([[]]);
     });
 
     it('No empty', async() => {
-        expect(library.formatForGraph(library.filterCasesEmpty(obj4)))
-            .toStrictEqual([{date: '20-1-22', value: 1}, {date: '20-1-23', value: 2}, {date: '20-1-24', value: 2}, {date: '20-1-25', value: 3}]);
+        expect(utility.formatForGraph(utility.filterCasesEmpty(obj4)))
+            .toStrictEqual([[{date: '20-1-22', value: 1}, {date: '20-1-23', value: 2}, {date: '20-1-24', value: 2}, {date: '20-1-25', value: 3}]]);
     });
 
     it('One empty', async() => {
-        expect(library.formatForGraph(library.filterCasesEmpty(obj2)))
-            .toStrictEqual([{date: '20-1-23', value: 1}]);
+        expect(utility.formatForGraph(utility.filterCasesEmpty(obj2)))
+            .toStrictEqual([[{date: '20-1-23', value: 1}]]);
     });
 });
 
-describe('includesCountry', () => {});
+describe('includesCountry', () => {
+    it('1st index should trigger', async() => {
+        expect(utility.includesCountry([['greece', null]], 0, 'greece')).not.toBeNull();
+    });
+
+    it('2nd index should trigger', async() => {
+        expect(utility.includesCountry([[null, 'greece']], 0, 'greece')).not.toBeNull();
+    });
+
+    it('Should not trigger', async() => {
+        expect(utility.includesCountry([['greece', null]], 0, 'italy')).toBeNull();
+    });
+});
+
+describe('sumRows', () => {
+    it('test sum 1', async() => {
+        expect(utility.sumRows([{value: 0}, {value: 5}], [{value: 5}, {value: 0}])).toStrictEqual([{value: 5}, {value: 5}]);
+    });
+
+    it('test sum 2', async() => {
+        expect(utility.sumRows([{value: 0}, {value: 0}], [{value: 0}, {value: 0}])).toStrictEqual([{value: 0}, {value: 0}]);
+    });
+});
+
+describe('getRowData', () => {
+    let arr = [
+        ['Country', 'Country 2', 'coord', 'inates', 'date 1', 'date 2'],
+        ['Greece', 'yes', 'coord', 'inates', '5', '15'],
+        ['not Greece', 'no', 'coord', 'inates', '15', '5'],
+    ];
+
+    let res1 = [
+        {value: 5, date: 'date 1'}, {value: 15, date: 'date 2'},
+    ];
+
+    let res2 = [
+        {value: 15, date: 'date 1'}, {value: 5, date: 'date 2'},
+    ];
+
+    it('test 1', async() => {
+        expect(utility.getRowData(arr, 1)).toStrictEqual(res1);
+    });
+
+    it('test 2', async() => {
+        expect(utility.getRowData(arr, 2)).toStrictEqual(res2);
+    });
+});
+
+describe('shouldSum', () => {
+    it('all', async() => {
+        expect(utility.shouldSum('all', null, null)).not.toBeNull();
+    });
+
+    it('other (no china)', async() => {
+        expect(utility.shouldSum('other', [['greece', null]], 0)).not.toBeNull();
+    });
+
+    it('other (with china)', async() => {
+        expect(utility.shouldSum('other', [['china', null]], 0)).toBe(false);
+    });
+
+    it('random country (exists)', async() => {
+        expect(utility.shouldSum('greece', [['greece', null]], 0)).not.toBeNull();
+    });
+
+    it('random country (doenst exists=)', async() => {
+        expect(utility.shouldSum('greece', [['kekw', null]], 0)).toBeNull();
+    });
+});
 
 describe('getPopulation', () => {
     const population = require('../data/population');
 
     it('us', async() => {
-        expect(library.getPopulation('us', null)).toBe(329470573);
+        expect(utility.getPopulation('us', null)).toBe(329470573);
     });
 
     it('all', async() => {
-        expect(library.getPopulation('all', null)).toBe(7444509223);
+        expect(utility.getPopulation('all', null)).toBe(7444509223);
     });
 
     it('other', async() => {
-        expect(library.getPopulation('other', null)).toBe(6034991826);
+        expect(utility.getPopulation('other', null)).toBe(6034991826);
     });
 
     it('Greece', async() => {
-        expect(library.getPopulation('greece', population)).toBe(11159773);
+        expect(utility.getPopulation('greece', population)).toBe(11159773);
     });
 });
 
@@ -221,68 +297,111 @@ describe('populationData', () => {
     };
 
     it('No populationC', async() => {
-        expect(library.populationData(null, populationD, populationR, population).populationC).toStrictEqual(0);
+        expect(utility.populationData(null, populationD, populationR, population).populationC).toStrictEqual(0);
     });
 
     it('All params passed', async() => {
-        expect(library.populationData(populationC, populationD, populationR, population)).toStrictEqual(obj);
+        expect(utility.populationData(populationC, populationD, populationR, population)).toStrictEqual(obj);
     });
 });
 
 describe('getGraphPieCountry', () => {
     it('all', async() => {
-        expect(library.getGraphPieCountry('all')).toStrictEqual('all countries');
+        expect(utility.getGraphPieCountry('all')).toStrictEqual('all countries');
     });
 
     it('other', async() => {
-        expect(library.getGraphPieCountry('other')).toStrictEqual('all countries except China');
+        expect(utility.getGraphPieCountry('other')).toStrictEqual('all countries except China');
     });
 
     it('Greece', async() => {
-        expect(library.getGraphPieCountry('greece')).toStrictEqual('Greece');
+        expect(utility.getGraphPieCountry('greece')).toStrictEqual('Greece');
     });
 });
 
 describe('replaceKnownCountryPie', () => {
     it('unknown country', async() => {
-        expect(library.replaceKnownCountryPie('greece')).toStrictEqual('greece');
+        expect(utility.replaceKnownCountryPie('greece')).toStrictEqual('greece');
     });
 
     it('vatican', async() => {
-        expect(library.replaceKnownCountryPie('vAtiCAN')).toStrictEqual('Vatican City State');
+        expect(utility.replaceKnownCountryPie('vAtiCAN')).toStrictEqual('Vatican City State');
     });
 
     it('korea', async() => {
-        expect(library.replaceKnownCountryPie('korea')).toStrictEqual('South Korea');
+        expect(utility.replaceKnownCountryPie('korea')).toStrictEqual('South Korea');
     });
 
     it('korea2', async() => {
-        expect(library.replaceKnownCountryPie('soUTH koREA')).toStrictEqual('South Korea');
+        expect(utility.replaceKnownCountryPie('soUTH koREA')).toStrictEqual('South Korea');
     });
 
     it('us', async() => {
-        expect(library.replaceKnownCountryPie('usa')).toStrictEqual('us');
+        expect(utility.replaceKnownCountryPie('usa')).toStrictEqual('us');
     });
 });
 
 describe('removeMaliciousChars', () => {
     it('Should remove one evil char', async() => {
-        expect(library.removeMaliciousChars('greece*')).toStrictEqual('greece');
+        expect(utility.removeMaliciousChars(['greece*'])).toStrictEqual(['greece']);
     });
 
     it('Should remove two evil char', async() => {
-        expect(library.removeMaliciousChars('gre+ece*')).toStrictEqual('greece');
+        expect(utility.removeMaliciousChars(['gre+ece*'])).toStrictEqual(['greece']);
     });
 
     it('Should remove two evil identical chars', async() => {
-        expect(library.removeMaliciousChars('greece[[')).toStrictEqual('greece');
+        expect(utility.removeMaliciousChars(['greece[['])).toStrictEqual(['greece']);
     });
 
     it('Should remove actual regex', async() => {
-        expect(library.removeMaliciousChars('[A-Za-z]*')).toStrictEqual('AZaz');
+        expect(utility.removeMaliciousChars(['[A-Za-z]*'])).toStrictEqual(['AZaz']);
     });
 
     it('Should remove singe evil char', async() => {
-        expect(library.removeMaliciousChars('*')).toStrictEqual('');
+        expect(utility.removeMaliciousChars(['*'])).toStrictEqual(['']);
+    });
+});
+
+describe('shouldRefreshFile', () => {
+    // Month and Day need to be incremented
+    it('file was created a month ago should refresh', async() => {
+        let today = new Date();
+        let value = {
+            month: today.getMonth(),
+            day: today.getDay(),
+            hour: today.getHours(),
+        };
+        expect(utility.shouldRefreshFile(value)).toBe(true);
+    });
+
+    it('file was created a day ago should refresh', async() => {
+        let today = new Date();
+        let value = {
+            month: today.getMonth() + 1,
+            day: today.getDay() - 1,
+            hour: today.getHours(),
+        };
+        expect(utility.shouldRefreshFile(value)).toBe(true);
+    });
+
+    it('file was created 6 hours ago should refresh', async() => {
+        let today = new Date();
+        let value = {
+            month: today.getMonth() + 1,
+            day: today.getDay(),
+            hour: today.getHours() - 6,
+        };
+        expect(utility.shouldRefreshFile(value)).toBe(true);
+    });
+
+    it('file was created less than 6 hours ago should not refresh', async() => {
+        let today = new Date();
+        let value = {
+            month: today.getMonth() + 1,
+            day: today.getDate(),
+            hour: today.getHours() - 5,
+        };
+        expect(utility.shouldRefreshFile(value)).toBe(false);
     });
 });
