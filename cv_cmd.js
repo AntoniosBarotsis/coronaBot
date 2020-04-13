@@ -1,7 +1,6 @@
 const { StringStream } = require('scramjet');
 const request = require('request');
 const axios = require('axios');
-const prefix = process.env.prefix;
 const fs = require('fs');
 const utility = require('./data/utility');
 const population = require('./data/population');

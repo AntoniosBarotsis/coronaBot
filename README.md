@@ -51,5 +51,5 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 Create a branch, add commits, and [open a pull request](https://github.com/AntoniosBarotsis/coronaBot/compare).
 
 ## Showcase
-
-![](/images/3.jpeg)
+ - ``.cv all``
+![bruh](/images/3.jpeg)
