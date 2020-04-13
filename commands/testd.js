@@ -14,8 +14,8 @@ module.exports = {
 
 
         let confirmedFile = './commands/downloads/confirmed.csv';
-        let recoveredFile = './commands/downloads/recovered.csv';
-        let deathsFile = './commands/downloads/deaths.csv';
+        // let recoveredFile = './commands/downloads/recovered.csv';
+        // let deathsFile = './commands/downloads/deaths.csv';
 
         async function download(url, str) {
             const filePath = path.resolve(__dirname, 'downloads', `${str}.csv`);
@@ -45,8 +45,8 @@ module.exports = {
 
         Promise.all(downloads).then(() => {
             let confirmedInitArray = fs.readFileSync(confirmedFile, 'UTF-8').split('\n');
-            let recoveredInitArray = fs.readFileSync(recoveredFile, 'UTF-8').split('\n');
-            let deathsInitArray = fs.readFileSync(deathsFile, 'UTF-8').split('\n');
+            // let recoveredInitArray = fs.readFileSync(recoveredFile, 'UTF-8').split('\n');
+            // let deathsInitArray = fs.readFileSync(deathsFile, 'UTF-8').split('\n');
             console.log(confirmedInitArray[1].split(','));
         });
 
