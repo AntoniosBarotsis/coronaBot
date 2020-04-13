@@ -146,8 +146,10 @@ function cv(args) {
 
             datasets.push(dataset);
         } else if (compare){
-            if (!dates[1])
-                console.log('There was an unexpected error, check your spelling');
+            if (values.length === 1) {
+                console.log('There seems to be no data available for your query, please try again! (check your spelling)');
+                return;
+            }
 
             dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
 
