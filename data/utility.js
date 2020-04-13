@@ -191,7 +191,6 @@ function includesCountry(arr, index, country) {
     if (arr[index][1]) {
         check += arr[index][1].toLowerCase() + ' ';
     }
-
     return check.match(`\\b${country.toLowerCase()}\\b`);
 }
 
@@ -202,9 +201,9 @@ function includesCountry(arr, index, country) {
  * @returns {*}
  */
 function sumRows(row1, row2) {
-    for (let i = 0; i < row1.length; i++) {
+    for (let i = 0; i < row1.length; i++)
         row1[i].value += row2[i].value;
-    }
+
     return row1;
 }
 
@@ -386,7 +385,7 @@ function getFileDate(path) {
 }
 
 /**
- * Only used in sumCases
+ * Only used in sumCases, returns null if false
  * @param country
  * @param arr
  * @param i

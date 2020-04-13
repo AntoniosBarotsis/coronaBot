@@ -84,8 +84,8 @@ function cv(args) {
                     const finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
                     resolve(finalArray);
                 }).catch(error => {
-                console.error(error);
-            });
+                    console.error(error);
+                });
         });
     }
 
