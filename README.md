@@ -51,15 +51,15 @@ Please contribute using [Github Flow](https://guides.github.com/introduction/flo
 Create a branch, add commits, and [open a pull request](https://github.com/AntoniosBarotsis/coronaBot/compare).
 
 ## Showcase
- - ``.cv all``\
+ - ```.cv all```\
 ![bruh](/images/3.jpeg)
 
- - ``.cv other change``\
+ - ```.cv other change```\
 ![bruh](/images/4.jpeg)
 
- - ``.cv us pie``\
+ - ```.cv us pie```\
 ![bruh](/images/2.jpeg)
 
- - ``.cv d greece compare romania``\
+ - ```.cv d greece compare romania```\
 ![bruh](/images/1.jpeg)
 
