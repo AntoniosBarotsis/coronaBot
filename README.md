@@ -49,3 +49,7 @@ Please [open an issue](https://github.com/AntoniosBarotsis/coronaBot/issues/new)
 
 Please contribute using [Github Flow](https://guides.github.com/introduction/flow/). 
 Create a branch, add commits, and [open a pull request](https://github.com/AntoniosBarotsis/coronaBot/compare).
+
+## Showcase
+
+![](/images/3.jpeg)
