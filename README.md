@@ -1,7 +1,6 @@
 # Covid-19 Discord Bot
 
 [![Build Status](https://travis-ci.org/AntoniosBarotsis/coronaBot.svg?branch=master)](https://travis-ci.org/AntoniosBarotsis/coronaBot)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/AntoniosBarotsis/coronaBot?color=green&style=plastic)
 
 A simple discord bot that can query data about confirmed, death and recovered cases regarding covid-19 and make plots with that data. 
 
@@ -15,12 +14,11 @@ A simple discord bot that can query data about confirmed, death and recovered ca
 ## Installation
 
 Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix.
-If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv`` in the root directory (this may or may not work as of now, I'll update 
-this part once I'm done with the bot part).
+If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv [arguments]`` in the root directory.
 
 ## Usage
 
-``[modifier] [country] [option]``
+``.cv [modifier] [country] [option]``
 
 - modifier
    - c (confirmed cases)
@@ -37,7 +35,9 @@ this part once I'm done with the bot part).
     - pie\
         Prints a pie chart (no need for modifier)
     - change\
-        Returns a chart showing the rate of change
+        Returns a chart showing the rate of change (modifier applicable)
+     - compare ``[country 2]``\
+        Plots both countries on the same chart (modifier applicable)
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
