@@ -1,6 +1,6 @@
 module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate};
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum};
 
 const fs = require('fs');
 
@@ -342,6 +342,11 @@ function removeMaliciousChars(country) {
     return country;
 }
 
+/**
+ * Returns true if the file was last updated more than 6 hours ago
+ * @param fileDate
+ * @returns {boolean}
+ */
 function shouldRefreshFile(fileDate) {
     let today = new Date();
 
@@ -351,6 +356,11 @@ function shouldRefreshFile(fileDate) {
 
 }
 
+/**
+ * Returns an object with data relevant to the date the passed file was created on
+ * @param path
+ * @returns {Promise<unknown>}
+ */
 function getFileDate(path) {
     return new Promise(function(resolve) {
         // './commands/downloads/output.csv'
@@ -373,4 +383,20 @@ function getFileDate(path) {
             });
         });
     });
+}
+
+/**
+ * Only used in sumCases
+ * @param country
+ * @param arr
+ * @param i
+ * @returns {boolean|RegExpMatchArray}
+ */
+function shouldSum(country, arr, i) {
+    if (country === 'all')
+        return true;
+    else if (country === 'other')
+        return !includesCountry(arr, i, 'china');
+    else
+        return includesCountry(arr, i, country);
 }

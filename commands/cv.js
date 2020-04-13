@@ -127,7 +127,7 @@ module.exports = {
 
             for (let i = 1; i < arr.length; i++) { // Loops through the entire array
                 for (let j in country) {
-                    if (country[j] === 'all') {
+                    if (utility.shouldSum(country[j], arr, i)) {
                         if (first[j]) {
                             initialRow[j] = utility.getRowData(arr, i);
                             first[j] = false;
@@ -135,44 +135,8 @@ module.exports = {
                             currentRow[j] = utility.getRowData(arr, i);
                             initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
                         }
-                    } else if (country[j] === 'other') {
-                        if (!utility.includesCountry(arr, i, 'china')) {
-                            if (first[j]) { // The first time this is ran (and hits) we want to update initialRow
-                                initialRow[j] = utility.getRowData(arr, i);
-                                first[j] = false;
-                            } else { // All other hits are added on top
-                                currentRow[j] = utility.getRowData(arr, i);
-                                initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
-                            }
-                        }
-                    } else {
-                        if (utility.includesCountry(arr, i, country[j])) {
-                            if (first[j]) { // The first time this is ran (and hits) we want to update initialRow
-                                initialRow[j] = utility.getRowData(arr, i);
-                                first[j] = false;
-                            } else { // All other hits are added on top
-                                currentRow[j] = utility.getRowData(arr, i);
-                                initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
-                            }
-                        }
                     }
                 }
-                // } else { // This is either all or other
-                //     if (includeChina) { // All
-                //         initialRow = utility.getRowData(arr, i);
-                //         for (let i = 2; i < arr.length; i++) {
-                //             currentRow = utility.getRowData(arr, i);
-                //             initialRow = utility.sumRows(initialRow, currentRow);
-                //         }
-                //     } else { // Other
-                //         initialRow = utility.getRowData(arr, i);
-                //         for (let i = 2; i < arr.length; i++) {
-                //             if (!utility.includesCountry(arr, i, 'china')) { // China must not be included in the row
-                //                 currentRow = utility.getRowData(arr, i);
-                //                 initialRow = utility.sumRows(initialRow, currentRow);
-                //             }
-                //         }
-                //     }
             }
             return initialRow;
         }
