@@ -12,12 +12,13 @@ const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master
 module.exports = {
     name: 'cv',
     description: 'Displays number of confirmed/deaths/recovered cases of covid-19 on specific countries.',
-    usage: '``' + prefix + 'cv [c/r/d](optional) [country/all/other] [pie/change]``\n' +
+    usage: '``' + prefix + 'cv [c/r/d](optional) [country/all/other] [pie/change/compare]``\n' +
         ' - If the first argument is left out, c is being selected by default.\n' +
         ' - All: Returns data on all countries\n' +
         ' - Other: Returns data on all countries except China\n' +
         ' - pie: Returns a pie chart (this is always c)\n' +
-        ' - change: Returns a line chart showing the rate of change or the corresponding modifier',
+        ' - change: Returns a line chart showing the rate of change or the corresponding modifier' +
+        ' - compare allows you to query 2 countries. Example: ``.cv r greece compare romania``',
     show: true,
     execute: function(message, args) {
         let flag;
@@ -57,27 +58,11 @@ module.exports = {
 
         const urlData = [];
 
-        // This part checks the first flag and adds the relevant data to urlData.
-        // Eventually there will be a second part like this that will add data for the second country.
-        // if (flag === 'c') {
-        //     urlData.push(getData(confirmed));
-        // } else if (flag === 'd') {
-        //     urlData.push(getData(deaths));
-        // } else {
-        //     urlData.push(getData(recovered));
-        // }
-
         urlData.push(getData(confirmed));
         urlData.push(getData(deaths));
         urlData.push(getData(recovered));
 
         Promise.all(urlData).then(arr => {
-            // Confirmed arr[0]
-            // Confirmed country 1: arr[0][0]
-            // Date 1 of confirmed country 1 arr[0][0][0]
-
-            // console.log(arr[0][0])
-            // return;
             if (pie) {
                 let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
                     arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
