@@ -29,24 +29,28 @@ module.exports = {
             flag = 'c';
         } // Default case
 
-        let country = '';
+        let country = [];
         if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-            country = country.concat(args).replace(/,/g, ' ').replace(args[0] + ' ', '');
+            country[0] = args.join(' ').replace(/,/g, ' ').replace(args[0] + ' ', '');
         } else { // Country isn't polluted by a url modifier.
-            country = country.concat(args).replace(/,/g, ' ');
+            country[0] = args.join(' ').replace(/,/g, ' ');
         }
 
         let pie = false;
         let change = false;
-        let countryP;
+        let compare = false;
+        let countryP = [];
 
-        if (country.includes(' pie')) {
-            country = country.replace(' pie', '');
+        if (country[0].includes(' pie')) {
+            country[0] = country[0].replace(' pie', '');
             pie = true;
-            countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country));
-        } else if (country.includes(' change')) {
-            country = country.replace(' change', '');
+            countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country[0]));
+        } else if (country[0].includes(' change')) {
+            country[0] = country[0].replace(' change', '');
             change = true;
+        } else if (country[0].includes('compare')) {
+            country = country[0].split(' compare ');
+            compare = true;
         }
 
         country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
@@ -68,9 +72,15 @@ module.exports = {
         urlData.push(getData(recovered));
 
         Promise.all(urlData).then(arr => {
+            // Confirmed arr[0]
+            // Confirmed country 1: arr[0][0]
+            // Date 1 of confirmed country 1 arr[0][0][0]
+
+            // console.log(arr[0][0])
+            // return;
             if (pie) {
-                let populationData = utility.populationData(arr[0][arr[0].length - 1], arr[1][arr[1].length - 1],
-                    arr[2][arr[2].length - 1], utility.getPopulation(countryP, population));
+                let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
+                    arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
                 generatePieChart(populationData);
             } else {
                 if (flag === 'd')
@@ -80,7 +90,7 @@ module.exports = {
                 else
                     generateGraph(arr[0]);
             }
-        });
+        }).catch(err => console.error(err));
 
         function getData(source) {
             /**
@@ -94,7 +104,7 @@ module.exports = {
                     .CSVParse() // parses it (csv format)
                     .consume(object => rows.push(object)) // pushes everything into rows[]
                     .then(() => {
-                        const arr = searchRow(rows, (country)); // Generates the array we want
+                        const arr = sumCases(rows, (country)); // Generates the array we want
                         // eslint-disable-next-line max-len
                         const finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
                         resolve(finalArray);
@@ -105,58 +115,25 @@ module.exports = {
         }
 
         /**
-         * Calls sumCases with the appropriate arguments
-         * @param data
-         * @param country
-         * @returns {*[]}
-         */
-        function searchRow(data, country) {
-            if (country === 'all') {
-                return sumCases(data, null, true);
-            } else if (country === 'other') {
-                return sumCases(data, null, false);
-            } else {
-                return sumCases(data, country, true);
-            }
-        }
-
-        /**
          * Sums rows in case there are multiple mentions of them (for example China) as well as all and other cases
          * @param arr
          * @param country
-         * @param includeChina
          * @returns {[]}
          */
-        function sumCases(arr, country, includeChina) {
-            let first = true;
+        function sumCases(arr, country) {
+            let first = [true, true];
             let initialRow = [];
             let currentRow = [];
 
             for (let i = 1; i < arr.length; i++) { // Loops through the entire array
-                if (country) { // If a country is given
-                    if (utility.includesCountry(arr, i, country)) {
-                        if (first) { // The first time this is ran (and hits) we want to update initialRow
-                            initialRow = utility.getRowData(arr, i);
-                            first = false;
-                        } else { // All other hits are added on top
-                            currentRow = utility.getRowData(arr, i);
-                            initialRow = utility.sumRows(initialRow, currentRow);
-                        }
-                    }
-                } else { // This is either all or other
-                    if (includeChina) { // All
-                        initialRow = utility.getRowData(arr, i);
-                        for (let i = 2; i < arr.length; i++) {
-                            currentRow = utility.getRowData(arr, i);
-                            initialRow = utility.sumRows(initialRow, currentRow);
-                        }
-                    } else { // Other
-                        initialRow = utility.getRowData(arr, i);
-                        for (let i = 2; i < arr.length; i++) {
-                            if (!utility.includesCountry(arr, i, 'china')) { // China must not be included in the row
-                                currentRow = utility.getRowData(arr, i);
-                                initialRow = utility.sumRows(initialRow, currentRow);
-                            }
+                for (let j in country) {
+                    if (utility.shouldSum(country[j], arr, i)) {
+                        if (first[j]) {
+                            initialRow[j] = utility.getRowData(arr, i);
+                            first[j] = false;
+                        } else {
+                            currentRow[j] = utility.getRowData(arr, i);
+                            initialRow[j] = utility.sumRows(initialRow[j], currentRow[j]);
                         }
                     }
                 }
@@ -175,27 +152,68 @@ module.exports = {
             const values = [];
 
             for (let i = 0; i < arr.length; i++) {
-                dates.push(arr[i].date);
-                values.push(arr[i].value);
+                dates[i] = [];
+                values[i] = [];
+                for (let j = 0; j < arr[i].length; j++) {
+                    dates[i].push(arr[i][j].date);
+                    values[i].push(arr[i][j].value);
+                }
             }
 
-            let dataset;
+            let datasets = [];
+            let dataset, dataset2;
 
             if (change) {
-                const valuesChange = utility.getChange(values);
+                const valuesChange = utility.getChange(values[0]);
                 dataset = {
-                    label: `${utility.getGraphLabel(country, flag)} (rate of change)`,
+                    label: `${utility.getGraphLabel(country[0], flag)} (rate of change)`,
                     data: valuesChange,
                     fill: true,
                     backgroundColor: utility.getGraphColor(flag),
                 };
+
+                datasets.push(dataset);
+            } else if (compare){
+                dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
+
+                if (values[0].length > values[1].length) {
+                    let difference = values[0].length - values[1].length;
+                    for (let i = 0; i < difference; i++) {
+                        values[1].unshift(0);
+                    }
+                } else if (values[0].length < values[1].length) {
+                    let difference = values[1].length - values[0].length;
+                    for (let i = 0; i < difference; i++) {
+                        values[0].unshift(0);
+                    }
+                }
+                // console.log(values[0].length, values[1].length, values[0].length - values[1].length);
+                dataset = {
+                    label: utility.getGraphLabel(country[0], flag),
+                    data: values[0],
+                    fill: false,
+                    backgroundColor: utility.getGraphColor(flag),
+                    borderColor: utility.getGraphColor(flag),
+                };
+                dataset2 = {
+                    label: utility.getGraphLabel(country[1], flag),
+                    data: values[1],
+                    fill: false,
+                    backgroundColor: utility.getGraphColor2(flag),
+                    borderColor: utility.getGraphColor2(flag),
+                };
+
+                datasets.push(dataset);
+                datasets.push(dataset2);
             } else {
                 dataset = {
-                    label: utility.getGraphLabel(country, flag),
-                    data: values,
+                    label: utility.getGraphLabel(country[0], flag),
+                    data: values[0],
                     fill: true,
                     backgroundColor: utility.getGraphColor(flag),
                 };
+
+                datasets.push(dataset);
             }
 
 
@@ -215,8 +233,8 @@ module.exports = {
                 chart: {
                     type: 'line',
                     data: {
-                        labels: dates,
-                        datasets: [dataset],
+                        labels: dates[0],
+                        datasets: datasets,
                     },
                     options: {
                         legend: {
@@ -276,7 +294,7 @@ module.exports = {
                     options: {
                         title: {
                             display: true,
-                            text: `Confirmed cases in ${utility.getGraphPieCountry(country)}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
+                            text: `Confirmed cases in ${utility.getGraphPieCountry(country[0])}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
                         },
                         legend: {
                             labels: {

@@ -1,6 +1,8 @@
-module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, formatForGraph, filterCasesDecreasing,
+module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie, removeMaliciousChars};
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum};
+
+const fs = require('fs');
 
 /**
  * Returns difference per array index
@@ -21,18 +23,18 @@ function getChange(arr) {
  * @param knownCountry
  * @returns {string|*}
  */
-function replaceKnownCountry(knownCountry) {
-    if (knownCountry.toLowerCase() === 'vatican') {
-        return 'holy see';
-    } else if (knownCountry.toLowerCase() === 'usa') {
-        return 'US';
-    } else if (knownCountry.toLowerCase() === 'uk') {
-        return 'united kingdom';
-    } else if (knownCountry.toLowerCase() === 'south korea') {
-        return 'korea';
-    } else {
-        return knownCountry;
+function replaceKnownCountry(country) {
+    for (let i in country) {
+        if (country[i].toLowerCase() === 'vatican')
+            country[i] = 'holy see';
+        else if (country[i].toLowerCase() === 'usa')
+            country[i] = 'US';
+        else if (country[i].toLowerCase() === 'uk')
+            country[i] = 'united kingdom';
+        else if (country[i].toLowerCase() === 'south korea')
+            country[i] = 'korea';
     }
+    return country;
 }
 
 /**
@@ -75,20 +77,38 @@ function getGraphColor(flag) {
 }
 
 /**
+ * Returns appropriate color based on the flag
+ * @param flag
+ * @returns {string}
+ */
+function getGraphColor2(flag) {
+    if (flag === 'r') {
+        return 'rgb(0,140,64)';
+    } else if (flag === 'd') {
+        return 'rgb(124,31,31)';
+    } else {
+        return 'rgb(30,78,155)';
+    }
+}
+
+/**
  * Changes date format so its recognised by chart.js
  * @param arr
  * @returns {[]}
  */
 function formatForGraph(arr) {
     const arrFinal = [];
-
     for (let i = 0; i < arr.length; i++) {
-        const temp = arr[i].date.split('/');
-        arrFinal.push({
-            date: `${temp[2]}-${temp[0]}-${temp[1]}`,
-            value: arr[i].value,
-        });
+        arrFinal.push([]);
+        for (let j = 0; j < arr[i].length; j++) {
+            const temp = arr[i][j].date.split('/');
+            arrFinal[i].push({
+                date: `${temp[2]}-${temp[0]}-${temp[1]}`,
+                value: arr[i][j].value,
+            });
+        }
     }
+
     return arrFinal;
 }
 
@@ -101,10 +121,13 @@ function filterCasesDecreasing(arr) {
     const finalArray = [];
 
     for (let i = 0; i < arr.length; i++) {
-        if (i === 0) {
-            finalArray.push(arr[i]);
-        } else if (arr[i].value >= arr[i - 1].value) {
-            finalArray.push(arr[i]);
+        finalArray.push([]);
+        for (let j = 0; j < arr[i].length; j++) {
+            if (j === 0) {
+                finalArray[i].push(arr[i][j]);
+            } else if (arr[i][j].value >= arr[i][j - 1].value) {
+                finalArray[i].push(arr[i][j]);
+            }
         }
     }
 
@@ -120,10 +143,13 @@ function filterCasesDupes(arr) {
     const finalArray = [];
 
     for (let i = 0; i < arr.length; i++) {
-        if (i === 0) {
-            finalArray.push(arr[i]);
-        } else if (arr[i].value !== arr[i - 1].value) {
-            finalArray.push(arr[i]);
+        finalArray.push([]);
+        for (let j = 0; j < arr[i].length; j++) {
+            if (j === 0) {
+                finalArray[i].push(arr[i][j]);
+            } else if (arr[i][j].value !== arr[i][j - 1].value) {
+                finalArray[i].push(arr[i][j]);
+            }
         }
     }
 
@@ -139,11 +165,14 @@ function filterCasesEmpty(arr) {
     const finalArray = [];
 
     for (let i = 0; i < arr.length; i++) {
-        if (arr[i].value !== 0) {
-            finalArray.push(arr[i]);
+        finalArray.push([]);
+        for (let j = 0; j < arr[i].length; j++) {
+            // console.log(i, arr[i][j])
+            if (arr[i][j].value !== 0) {
+                finalArray[i].push(arr[i][j]);
+            }
         }
     }
-
     return finalArray;
 }
 
@@ -305,9 +334,69 @@ function replaceKnownCountryPie(country) {
 function removeMaliciousChars(country) {
     let maliciousChars = '[](){}<>-\\/|?!;^$.&*+';
 
-    for (let i in maliciousChars)
-        if (country.includes(maliciousChars[i]))
-            country = country.split(maliciousChars[i]).join('');
+    for (let i in country)
+        for (let j in maliciousChars)
+            if (country[i].includes(maliciousChars[j]))
+                country[i] = country[i].split(maliciousChars[j]).join('');
 
     return country;
+}
+
+/**
+ * Returns true if the file was last updated more than 6 hours ago
+ * @param fileDate
+ * @returns {boolean}
+ */
+function shouldRefreshFile(fileDate) {
+    let today = new Date();
+
+    if (fileDate.month < today.getMonth() + 1 || fileDate.day < today.getDate())
+        return true;
+    else return today.getHours() - fileDate.hour >= 6;
+
+}
+
+/**
+ * Returns an object with data relevant to the date the passed file was created on
+ * @param path
+ * @returns {Promise<unknown>}
+ */
+function getFileDate(path) {
+    return new Promise(function(resolve) {
+        // './commands/downloads/output.csv'
+        fs.open(path, 'r', (err, fd) => {
+            if (err) throw err;
+
+            fs.fstat(fd, (err, stat) => {
+                if (err) throw err;
+
+                fs.close(fd, (err) => {
+                    if (err) throw err;
+                });
+
+                resolve({
+                    month: stat.mtime.getMonth() + 1,
+                    day: stat.mtime.getDate(),
+                    hour: stat.mtime.getHours(),
+                    minute: stat.mtime.getMinutes(),
+                });
+            });
+        });
+    });
+}
+
+/**
+ * Only used in sumCases
+ * @param country
+ * @param arr
+ * @param i
+ * @returns {boolean|RegExpMatchArray}
+ */
+function shouldSum(country, arr, i) {
+    if (country === 'all')
+        return true;
+    else if (country === 'other')
+        return !includesCountry(arr, i, 'china');
+    else
+        return includesCountry(arr, i, country);
 }
