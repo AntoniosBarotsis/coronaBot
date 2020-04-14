@@ -1,6 +1,8 @@
 # Covid-19 Discord Bot
 
-A simple discord bot that can query data about confirmed, death and recovered cases regarding covid-19 and make plots with that data. 
+[![Build Status](https://travis-ci.org/AntoniosBarotsis/coronaBot.svg?branch=master)](https://travis-ci.org/AntoniosBarotsis/coronaBot)
+
+A simple discord bot that can query data about confirmed, death and recovered cases regarding Covid-19 and make plots with that data. 
 
 ## Table of Contents
 
@@ -12,12 +14,11 @@ A simple discord bot that can query data about confirmed, death and recovered ca
 ## Installation
 
 Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix.
-If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv`` in the root directory (this may or may not work as of now, I'll update 
-this part once I'm done with the bot part).
+If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv [arguments]`` in the root directory.
 
 ## Usage
 
-``[modifier] [country] [option]``
+``.cv [modifier] [country] [option]``
 
 - modifier
    - c (confirmed cases)
@@ -32,9 +33,11 @@ this part once I'm done with the bot part).
     
 - option (optional)
     - pie\
-        Prints a pie chart (no need for modifier)
+        Prints a pie chart (no need for modifier). Example usage: ``.cv us pie``
     - change\
-        Returns a chart showing the rate of change
+        Returns a chart showing the rate of change (modifier applicable). Example usage: ``.cv d italy change``
+     - compare ``[country 2]``\
+        Plots both countries on the same chart (modifier applicable). Example usage: ``.cv r greece compare romania``
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
@@ -46,3 +49,17 @@ Please [open an issue](https://github.com/AntoniosBarotsis/coronaBot/issues/new)
 
 Please contribute using [Github Flow](https://guides.github.com/introduction/flow/). 
 Create a branch, add commits, and [open a pull request](https://github.com/AntoniosBarotsis/coronaBot/compare).
+
+## Showcase
+ - ```.cv all```\
+![bruh](/images/3.jpeg)
+
+ - ```.cv other change```\
+![bruh](/images/4.jpeg)
+
+ - ```.cv us pie```\
+![bruh](/images/2.jpeg)
+
+ - ```.cv d greece compare romania```\
+![bruh](/images/1.jpeg)
+

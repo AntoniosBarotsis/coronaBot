@@ -21,6 +21,11 @@ module.exports = {
         ' - compare allows you to query 2 countries. Example: ``.cv r greece compare romania``',
     show: true,
     execute: function(message, args) {
+        if (args.length === 0) {
+            message.channel.send('Please specify a country using ``.cv [country]``.');
+            return;
+        }
+
         let flag;
 
         // Check if args[0] is r or d, else apply c (default).
@@ -159,6 +164,12 @@ module.exports = {
 
                 datasets.push(dataset);
             } else if (compare){
+                if (values.length === 1) {
+                    message.channel.send('There seems to be no data available for your query, please try again! (check your spelling)');
+                    message.channel.startTyping();
+                    return;
+                }
+
                 dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
 
                 if (values[0].length > values[1].length) {

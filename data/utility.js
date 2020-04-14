@@ -33,6 +33,8 @@ function replaceKnownCountry(country) {
             country[i] = 'united kingdom';
         else if (country[i].toLowerCase() === 'south korea')
             country[i] = 'korea';
+        else if (country[i].toLowerCase() === 'nl')
+            country[i] = 'netherlands';
     }
     return country;
 }

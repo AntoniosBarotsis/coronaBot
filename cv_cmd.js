@@ -1,7 +1,6 @@
 const { StringStream } = require('scramjet');
 const request = require('request');
 const axios = require('axios');
-const prefix = process.env.prefix;
 const fs = require('fs');
 const utility = require('./data/utility');
 const population = require('./data/population');
@@ -147,6 +146,11 @@ function cv(args) {
 
             datasets.push(dataset);
         } else if (compare){
+            if (values.length === 1) {
+                console.log('There seems to be no data available for your query, please try again! (check your spelling)');
+                return;
+            }
+
             dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
 
             if (values[0].length > values[1].length) {
@@ -297,6 +301,8 @@ function openImage() {
         exec('1.jpeg');
     } else if (process.platform === 'linux') {
         exec('xdg-open 1.jpeg');
+    } else if (process.platform === 'darwin') {
+        exec('open 1.jpeg');
     }
 }
 
