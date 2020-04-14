@@ -5,7 +5,7 @@ module.exports = {
     description: 'Logs your message which will later be viewed by me 0_0 so ples post many epic feedback ok thanks bye. Do ``.help log``',
     usage: 'What I want feedback on: So .cv should be working now. If you find countries that should work but dont ' +
         '(for example usa or vatican didnt work) make sure to .log them so I can fix them later.',
-    show: true,
+    show: false,
     execute(message, args) {
         fs.readFile('data/log.json', (err, json) => {
             if (err) { console.error(err); json = '{}'; }
