@@ -301,6 +301,8 @@ function openImage() {
         exec('1.jpeg');
     } else if (process.platform === 'linux') {
         exec('xdg-open 1.jpeg');
+    } else if (process.platform === 'darwin') {
+        exec('open 1.jpeg');
     }
 }
 
