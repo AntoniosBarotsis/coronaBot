@@ -165,7 +165,8 @@ module.exports = {
                 datasets.push(dataset);
             } else if (compare){
                 if (values.length === 1) {
-                    console.log('There seems to be no data available for your query, please try again! (check your spelling)');
+                    message.channel.send('There seems to be no data available for your query, please try again! (check your spelling)');
+                    message.channel.startTyping();
                     return;
                 }
 
