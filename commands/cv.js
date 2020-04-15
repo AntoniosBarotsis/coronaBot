@@ -51,12 +51,14 @@ module.exports = {
             country[0] = country[0].replace(' pie', '');
             pie = true;
             countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country[0]));
-        } else if (country[0].includes(' change')) {
-            country[0] = country[0].replace(' change', '');
-            change = true;
-        } else if (country[0].includes('compare')) {
-            country = country[0].split(' compare ');
-            compare = true;
+        } else {
+            if (country[0].includes(' change')) {
+                country[0] = country[0].replace(' change', '');
+                change = true;
+            } if (country[0].includes('compare')) {
+                country = country[0].split(' compare ');
+                compare = true;
+            }
         }
 
         country = utility.replaceKnownCountry(utility.removeMaliciousChars(country));
@@ -153,21 +155,16 @@ module.exports = {
             let datasets = [];
             let dataset, dataset2;
 
-            if (change) {
-                const valuesChange = utility.getChange(values[0]);
-                dataset = {
-                    label: `${utility.getGraphLabel(country[0], flag)} (rate of change)`,
-                    data: valuesChange,
-                    fill: true,
-                    backgroundColor: utility.getGraphColor(flag),
-                };
-
-                datasets.push(dataset);
-            } else if (compare){
+            if (compare){
                 if (values.length === 1) {
                     message.channel.send('There seems to be no data available for your query, please try again! (check your spelling)');
                     message.channel.startTyping();
                     return;
+                }
+
+                if (change) {
+                    values[0] = utility.getChange(values[0]);
+                    values[1] = utility.getChange(values[1]);
                 }
 
                 dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
@@ -185,14 +182,14 @@ module.exports = {
                 }
                 // console.log(values[0].length, values[1].length, values[0].length - values[1].length);
                 dataset = {
-                    label: utility.getGraphLabel(country[0], flag),
+                    label: (change) ? `${utility.getGraphLabel(country[0], flag)} (rate of change)` : utility.getGraphLabel(country[0], flag),
                     data: values[0],
                     fill: false,
                     backgroundColor: utility.getGraphColor(flag),
                     borderColor: utility.getGraphColor(flag),
                 };
                 dataset2 = {
-                    label: utility.getGraphLabel(country[1], flag),
+                    label: (change) ? `${utility.getGraphLabel(country[0], flag)} (rate of change)` : utility.getGraphLabel(country[0], flag),
                     data: values[1],
                     fill: false,
                     backgroundColor: utility.getGraphColor2(flag),
@@ -201,6 +198,16 @@ module.exports = {
 
                 datasets.push(dataset);
                 datasets.push(dataset2);
+            } else if (change) {
+                const valuesChange = utility.getChange(values[0]);
+                dataset = {
+                    label: `${utility.getGraphLabel(country[0], flag)} (rate of change)`,
+                    data: valuesChange,
+                    fill: true,
+                    backgroundColor: utility.getGraphColor(flag),
+                };
+
+                datasets.push(dataset);
             } else {
                 dataset = {
                     label: utility.getGraphLabel(country[0], flag),
