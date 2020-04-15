@@ -189,7 +189,7 @@ module.exports = {
                     borderColor: utility.getGraphColor(flag),
                 };
                 dataset2 = {
-                    label: (change) ? `${utility.getGraphLabel(country[0], flag)} (rate of change)` : utility.getGraphLabel(country[0], flag),
+                    label: (change) ? `${utility.getGraphLabel(country[1], flag)} (rate of change)` : utility.getGraphLabel(country[1], flag),
                     data: values[1],
                     fill: false,
                     backgroundColor: utility.getGraphColor2(flag),
