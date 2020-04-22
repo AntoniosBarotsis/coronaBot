@@ -29,7 +29,13 @@ function cv(args) {
     let pie = false;
     let change = false;
     let compare = false;
+    let logarithmic = false;
     let countryP = [];
+
+    if (country[0].includes('log')) {
+        country[0] = country[0].replace(' log', '');
+        logarithmic = true;
+    }
 
     if (country[0].includes(' pie')) {
         country[0] = country[0].replace(' pie', '');
@@ -218,6 +224,11 @@ function cv(args) {
                     datasets: datasets,
                 },
                 options: {
+                    scales: {
+                        yAxes: [{
+                            type: logarithmic ? 'logarithmic' : 'linear',
+                        }]
+                    },
                     legend: {
                         labels: {
                             fontColor: 'white',
