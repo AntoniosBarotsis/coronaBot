@@ -16,7 +16,8 @@ plots with that data.
 ## Installation
 
 - Using a Discord bot:
-    Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix.
+    Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix (I used ``.``
+    as a prefix in the following examples).
 - Without a Discord bot:
     Run the code through your console by running ``npm run cv [arguments]`` in the root directory.
 
