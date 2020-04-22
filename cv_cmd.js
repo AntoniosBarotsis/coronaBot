@@ -128,6 +128,16 @@ function cv(args) {
      * @param arr
      */
     function generateGraph(arr) {
+
+        let extraStr = '';
+
+        if (change && logarithmic)
+            extraStr = '(rate of change, logarithmic)';
+        else if (change)
+            extraStr = '(rate of change)';
+        else if (logarithmic)
+            extraStr = '(logarithmic)'
+
         const dates = [];
         const values = [];
 
@@ -169,14 +179,14 @@ function cv(args) {
             }
             // console.log(values[0].length, values[1].length, values[0].length - values[1].length);
             dataset = {
-                label: (change) ? `${utility.getGraphLabel(country[0], flag)} (rate of change)` : utility.getGraphLabel(country[0], flag),
+                label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: values[0],
                 fill: false,
                 backgroundColor: utility.getGraphColor(flag),
                 borderColor: utility.getGraphColor(flag),
             };
             dataset2 = {
-                label: (change) ? `${utility.getGraphLabel(country[1], flag)} (rate of change)` : utility.getGraphLabel(country[1], flag),
+                label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: values[1],
                 fill: false,
                 backgroundColor: utility.getGraphColor2(flag),
@@ -188,7 +198,7 @@ function cv(args) {
         } else if (change) {
             const valuesChange = utility.getChange(values[0]);
             dataset = {
-                label: `${utility.getGraphLabel(country[0], flag)} (rate of change)`,
+                label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: valuesChange,
                 fill: true,
                 backgroundColor: utility.getGraphColor(flag),
@@ -197,7 +207,7 @@ function cv(args) {
             datasets.push(dataset);
         } else {
             dataset = {
-                label: utility.getGraphLabel(country[0], flag),
+                label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: values[0],
                 fill: true,
                 backgroundColor: utility.getGraphColor(flag),
