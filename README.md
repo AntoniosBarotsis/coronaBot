@@ -1,6 +1,7 @@
 # Covid-19 Discord Bot
 
 [![Build Status](https://travis-ci.org/AntoniosBarotsis/coronaBot.svg?branch=master)](https://travis-ci.org/AntoniosBarotsis/coronaBot)
+![GitHub repo size](https://img.shields.io/github/repo-size/AntoniosBarotsis/coronaBot?color=light%20green)
 
 A simple discord bot that can query data about confirmed, death and recovered cases regarding Covid-19 and make plots with that data. 
 
