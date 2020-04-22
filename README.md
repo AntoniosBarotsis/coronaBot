@@ -36,9 +36,11 @@ If you dont want to use a discord bot you can also run the code through your con
         Prints a pie chart (no need for modifier). Example usage: ``.cv us pie``
     - change\
         Returns a chart showing the rate of change (modifier applicable). Example usage: ``.cv d italy change``
-     - compare ``[country 2]``\
+    - compare ``[country 2]``\
         Plots both countries on the same chart (modifier applicable). Example usage: ``.cv r greece compare romania``.
         Note that you can combine ``change`` and ``compare`` like so: ``.cv spain compare italy change``.
+    - log\
+        Plots a logarithmic graph instead of a linear one. Can be combined with ``compare``.
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
@@ -66,3 +68,6 @@ Create a branch, add commits, and [open a pull request](https://github.com/Anton
 
 - ```.cv spain compare italy change```\
 ![bruh](/images/5.jpeg)
+
+- ```.cv russia compare albania log```\
+![bruh](/images/6.jpeg)

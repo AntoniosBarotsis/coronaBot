@@ -18,7 +18,8 @@ module.exports = {
         ' - Other: Returns data on all countries except China\n' +
         ' - pie: Returns a pie chart (this is always c)\n' +
         ' - change: Returns a line chart showing the rate of change or the corresponding modifier' +
-        ' - compare allows you to query 2 countries. Example: ``.cv r greece compare romania``',
+        ' - compare: allows you to query 2 countries. Example: ``.cv r greece compare romania``' +
+        ' - log: plots logarithmic graphs instead',
     show: true,
     execute: function(message, args) {
         if (args.length === 0) {
@@ -45,7 +46,13 @@ module.exports = {
         let pie = false;
         let change = false;
         let compare = false;
+        let logarithmic = false;
         let countryP = [];
+
+        if (country[0].includes('log')) {
+            country[0] = country[0].replace(' log', '');
+            logarithmic = true;
+        }
 
         if (country[0].includes(' pie')) {
             country[0] = country[0].replace(' pie', '');
@@ -215,7 +222,6 @@ module.exports = {
                     fill: true,
                     backgroundColor: utility.getGraphColor(flag),
                 };
-
                 datasets.push(dataset);
             }
 
@@ -240,6 +246,11 @@ module.exports = {
                         datasets: datasets,
                     },
                     options: {
+                        scales: {
+                            yAxes: [{
+                                type: logarithmic ? 'logarithmic' : 'linear',
+                            }]
+                        },
                         legend: {
                             labels: {
                                 fontColor: 'white',
