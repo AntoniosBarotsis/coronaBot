@@ -1,6 +1,6 @@
 module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum};
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel};
 
 const fs = require('fs');
 
@@ -400,4 +400,13 @@ function shouldSum(country, arr, i) {
         return !includesCountry(arr, i, 'china');
     else
         return includesCountry(arr, i, country);
+}
+
+function getBarLabel(flag) {
+    if (flag === 'c')
+        return 'Confirmed cases';
+    if (flag === 'r')
+        return 'Recovered cases';
+    else
+        return 'Deaths';
 }

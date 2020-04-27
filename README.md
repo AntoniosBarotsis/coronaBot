@@ -46,6 +46,8 @@ plots with that data.
         Note that you can combine ``change`` and ``compare`` like so: ``.cv spain compare italy change``.
     - log\
         Plots a logarithmic graph instead of a linear one. Can be combined with ``compare``.
+    -top\
+        Plots a bar graph with the top 10 countries in terms of c/r/d cases. By default it plots the top 10.
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
@@ -76,3 +78,6 @@ Create a branch, add commits, and [open a pull request](https://github.com/Anton
 
 - ```.cv russia compare albania log```\
 ![bruh](/images/6.jpeg)
+
+- ```.cv top 20```\
+![bruh](/images/7.jpeg)

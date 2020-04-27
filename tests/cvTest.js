@@ -405,3 +405,17 @@ describe('shouldRefreshFile', () => {
         expect(utility.shouldRefreshFile(value)).toBe(false);
     });
 });
+
+describe('getBarLabel', () => {
+    it('Should return confirmed cases for c', async() => {
+        expect(utility.getBarLabel('c')).toStrictEqual('Confirmed cases');
+    });
+
+    it('Should return confirmed for d', async() => {
+        expect(utility.getBarLabel('d')).toStrictEqual('Deaths');
+    });
+
+    it('Should return confirmed for r', async() => {
+        expect(utility.getBarLabel('r')).toStrictEqual('Recovered cases');
+    });
+});
