@@ -30,7 +30,18 @@ function cv(args) {
     let change = false;
     let compare = false;
     let logarithmic = false;
+    let top = false;
     let countryP = [];
+    let topNumber;
+
+    // Checks if user inputted any number for the top case
+    let tmpTopNumber = '';
+    for (let i in country[0]) {
+        if (country[0][i].match(/[0-9]/)) {
+            tmpTopNumber = tmpTopNumber + country[0][i];
+        }
+    }
+    topNumber = tmpTopNumber > 0 ? tmpTopNumber : 10; // By default top will display the top countries
 
     if (country[0].includes('log')) {
         country[0] = country[0].replace(' log', '');
@@ -45,9 +56,14 @@ function cv(args) {
         if (country[0].includes(' change')) {
             country[0] = country[0].replace(' change', '');
             change = true;
-        } if (country[0].includes('compare')) {
+        }
+
+        if (country[0].includes('compare')) {
             country = country[0].split(' compare ');
             compare = true;
+        } else if (country[0].includes('top')) {
+            country[0] = 'all';
+            top = true;
         }
     }
 
@@ -60,7 +76,9 @@ function cv(args) {
     urlData.push(getData(recovered));
 
     Promise.all(urlData).then(arr => {
-        if (pie) {
+        if (top) {
+            generateBarChart(arr, flag, topNumber, top);
+        } else if (pie) {
             let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
                 arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
             generatePieChart(populationData);
@@ -86,9 +104,16 @@ function cv(args) {
                 .CSVParse() // parses it (csv format)
                 .consume(object => rows.push(object)) // pushes everything into rows[]
                 .then(() => {
-                    const arr = sumCases(rows, (country)); // Generates the array we want
-                    // eslint-disable-next-line max-len
-                    const finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr)))); // Filters out stuff, configure this as you like
+                    let finalArray;
+
+                    if (top) {
+                        finalArray = getTopCases(rows);
+                    } else {
+                        const arr = sumCases(rows, (country)); // Generates the array we want
+                        // Filters out stuff, configure this as you like
+                        finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr))));
+                    }
+
                     resolve(finalArray);
                 }).catch(error => {
                     console.error(error);
@@ -124,6 +149,22 @@ function cv(args) {
     }
 
     /**
+     * Gets the last recorded number of each country
+     * @param arr
+     * @returns {country, biggestValue}
+     */
+    function getTopCases(arr) {
+        let finalArr = [];
+        for (let i = 1; i < arr.length; i++) {
+            let currentCountry = arr[i][0] ? arr[i][0] : arr[i][1];
+            finalArr.push({country: currentCountry, biggestValue: arr[i][arr[i].length - 1]});
+        }
+        return finalArr.sort((a, b) => {
+            return b.biggestValue - a.biggestValue;
+        });
+    }
+
+    /**
      * Generates and sends line chart
      * @param arr
      */
@@ -136,7 +177,7 @@ function cv(args) {
         else if (change)
             extraStr = '(rate of change)';
         else if (logarithmic)
-            extraStr = '(logarithmic)'
+            extraStr = '(logarithmic)';
 
         const dates = [];
         const values = [];
@@ -177,7 +218,7 @@ function cv(args) {
                     values[0].unshift(0);
                 }
             }
-            // console.log(values[0].length, values[1].length, values[0].length - values[1].length);
+
             dataset = {
                 label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: values[0],
@@ -237,7 +278,7 @@ function cv(args) {
                     scales: {
                         yAxes: [{
                             type: logarithmic ? 'logarithmic' : 'linear',
-                        }]
+                        }],
                     },
                     legend: {
                         labels: {
@@ -248,23 +289,7 @@ function cv(args) {
             },
         };
 
-        // post req. with params to create our chart
-        axios({
-            method: 'post',
-            url: 'https://quickchart.io/chart',
-            responseType: 'stream',
-            data: chartData,
-        })
-            .then((res) => {
-                // pipe image into writestream and send image when done
-                res.data.pipe(fs.createWriteStream('1.jpeg'))
-                    .on('finish', () => {
-                        openImage();
-                    });
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        getChart(chartData);
     }
 
     /**
@@ -305,6 +330,61 @@ function cv(args) {
             },
         };
 
+        getChart(chartData);
+    }
+
+    /**
+     * Generates a bar chart with the top n countries
+     * @param arr
+     */
+    function generateBarChart(arr) {
+        let labels = [];
+        let values = [];
+
+        let crd = flag === 'c' ? 0 : flag === 'd' ? 1 : 2;
+
+        for (let i = 0; i < topNumber; i++) {
+            labels[i] = arr[crd][i].country;
+            values[i] = arr[crd][i].biggestValue;
+        }
+
+        const chartData = {
+            backgroundColor: 'rgba(44,47,51, 1)',
+            width: 1000,
+            height: 500,
+            format: 'jpg',
+            chart: {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: utility.getBarLabel(flag),
+                        backgroundColor: utility.getGraphColor(flag),
+                        data: values,
+                    }],
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: `Top ${topNumber} countries`,
+                    },
+                    legend: {
+                        labels: {
+                            fontColor: 'white',
+                        },
+                    },
+                },
+            },
+        };
+
+        getChart(chartData);
+    }
+
+    /**
+     * Generates the chart, exports it to an image and opens it
+     * @param chartData
+     */
+    function getChart(chartData) {
         axios({
             method: 'post',
             url: 'https://quickchart.io/chart',
@@ -324,6 +404,9 @@ function cv(args) {
     }
 }
 
+/**
+ * Opens the image
+ */
 function openImage() {
     if (process.platform === 'win32') {
         exec('1.jpeg');
