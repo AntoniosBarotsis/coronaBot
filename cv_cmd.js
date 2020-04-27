@@ -136,7 +136,7 @@ function cv(args) {
         else if (change)
             extraStr = '(rate of change)';
         else if (logarithmic)
-            extraStr = '(logarithmic)'
+            extraStr = '(logarithmic)';
 
         const dates = [];
         const values = [];
@@ -237,7 +237,7 @@ function cv(args) {
                     scales: {
                         yAxes: [{
                             type: logarithmic ? 'logarithmic' : 'linear',
-                        }]
+                        }],
                     },
                     legend: {
                         labels: {

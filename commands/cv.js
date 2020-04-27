@@ -154,7 +154,7 @@ module.exports = {
             else if (change)
                 extraStr = '(rate of change)';
             else if (logarithmic)
-                extraStr = '(logarithmic)'
+                extraStr = '(logarithmic)';
 
             const dates = [];
             const values = [];
@@ -258,7 +258,7 @@ module.exports = {
                         scales: {
                             yAxes: [{
                                 type: logarithmic ? 'logarithmic' : 'linear',
-                            }]
+                            }],
                         },
                         legend: {
                             labels: {
