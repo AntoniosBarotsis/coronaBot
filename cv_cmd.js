@@ -58,12 +58,12 @@ function cv(args) {
             change = true;
         }
 
-        if (country[0].includes('compare')) {
-            country = country[0].split(' compare ');
-            compare = true;
-        } else if (country[0].includes('top')) {
+        if (country[0].includes('top')) {
             country[0] = 'all';
             top = true;
+        } else if (country[0].includes('compare')) {
+            country = country[0].split(' compare ');
+            compare = true;
         }
     }
 
@@ -109,7 +109,7 @@ function cv(args) {
                     if (top) {
                         finalArray = getTopCases(rows);
                     } else {
-                        const arr = sumCases(rows, (country)); // Generates the array we want
+                        const arr = sumCases(rows, country); // Generates the array we want
                         // Filters out stuff, configure this as you like
                         finalArray = utility.formatForGraph(utility.filterCasesDecreasing(utility.filterCasesDupes(utility.filterCasesEmpty(arr))));
                     }
@@ -155,10 +155,20 @@ function cv(args) {
      */
     function getTopCases(arr) {
         let finalArr = [];
+        let summedObj = {};
         for (let i = 1; i < arr.length; i++) {
-            let currentCountry = arr[i][0] ? arr[i][0] : arr[i][1];
-            finalArr.push({country: currentCountry, biggestValue: arr[i][arr[i].length - 1]});
+            let currentCountry = arr[i][1] ? arr[i][1] : arr[i][0];
+            let biggestValue = (change) ? arr[i][arr[i].length - 1] - arr[i][arr[i].length - 2] : arr[i][arr[i].length - 1];
+
+            if (summedObj.hasOwnProperty(currentCountry)) {
+                summedObj[currentCountry] = summedObj[currentCountry] + parseInt(biggestValue, 10);
+            } else
+                summedObj[currentCountry] = parseInt(biggestValue, 10);
         }
+
+        for (let i in summedObj)
+            finalArr.push({country: i, biggestValue: summedObj[i]});
+
         return finalArr.sort((a, b) => {
             return b.biggestValue - a.biggestValue;
         });
@@ -348,6 +358,8 @@ function cv(args) {
             values[i] = arr[crd][i].biggestValue;
         }
 
+        let str = (change) ? '(by rate of change of the last day)' : '';
+
         const chartData = {
             backgroundColor: 'rgba(44,47,51, 1)',
             width: 1000,
@@ -366,7 +378,7 @@ function cv(args) {
                 options: {
                     title: {
                         display: true,
-                        text: `Top ${topNumber} countries`,
+                        text: `Top ${topNumber} countries ${str}`,
                     },
                     legend: {
                         labels: {
