@@ -1,8 +1,10 @@
 # Covid-19 Discord Bot
 
 [![Build Status](https://travis-ci.org/AntoniosBarotsis/coronaBot.svg?branch=master)](https://travis-ci.org/AntoniosBarotsis/coronaBot)
+![GitHub repo size](https://img.shields.io/github/repo-size/AntoniosBarotsis/coronaBot?color=light%20green)
 
-A simple discord bot that can query data about confirmed, death and recovered cases regarding Covid-19 and make plots with that data. 
+A simple discord bot/command line application that can query data about confirmed, death and recovered cases regarding Covid-19 and make 
+plots with that data. 
 
 ## Table of Contents
 
@@ -13,8 +15,11 @@ A simple discord bot that can query data about confirmed, death and recovered ca
 
 ## Installation
 
-Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix.
-If you dont want to use a discord bot you can also run the code through your console by running ``npm run cv [arguments]`` in the root directory.
+- Using a Discord bot:
+    Download the repository and add a ``.env`` file in root containing your bot token and your preferred prefix (I used ``.``
+    as a prefix in the following examples).
+- Without a Discord bot:
+    Run the code through your console by running ``npm run cv [arguments]`` in the root directory.
 
 ## Usage
 
