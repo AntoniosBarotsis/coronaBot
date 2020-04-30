@@ -386,11 +386,9 @@ function cv(args, message) {
         let labels = [];
         let values = [];
 
-        let crd = flag === 'c' ? 0 : flag === 'd' ? 1 : 2;
-
         for (let i = 0; i < topNumber; i++) {
-            labels[i] = arr[crd][i].country;
-            values[i] = arr[crd][i].biggestValue;
+            labels[i] = arr[0][i].country;
+            values[i] = arr[0][i].biggestValue;
         }
 
         let str = (change) ? '(by rate of change of the last day)' : '';
