@@ -12,6 +12,7 @@ const cv_cmd = require('./../cv_cmd');
 const utility = require('./utility');
 
 function cv(args, message) {
+    console.time('Entire cv command');
 
     if (args.length === 0) {
         if (message)
@@ -20,7 +21,6 @@ function cv(args, message) {
             console.log('Please specify a country using cv [country].');
         return;
     }
-    let start = new Date();
 
     let flag;
 
@@ -86,9 +86,22 @@ function cv(args, message) {
     if (message)
         message.channel.startTyping();
 
-    urlData.push(getData(confirmed));
-    urlData.push(getData(deaths));
-    urlData.push(getData(recovered));
+    if (pie) {
+        urlData.push(getData(confirmed));
+        urlData.push(getData(deaths));
+        urlData.push(getData(recovered));
+    } else {
+        switch (flag) {
+        case 'c':
+            urlData.push(getData(confirmed));
+            break;
+        case 'r':
+            urlData.push(getData(recovered));
+            break;
+        case 'd':
+            urlData.push(getData(deaths));
+        }
+    }
 
     Promise.all(urlData).then(arr => {
         if (top) {
@@ -434,8 +447,7 @@ function cv(args, message) {
                 // pipe image into writestream and send image when done
                 res.data.pipe(fs.createWriteStream('1.jpeg'))
                     .on('finish', () => {
-                        let end = new Date() - start;
-                        console.info('Execution time: %dms', end);
+                        console.timeEnd('Entire cv command');
 
                         if (message)
                             message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
