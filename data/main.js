@@ -111,12 +111,7 @@ function cv(args, message) {
                 arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
             generatePieChart(populationData);
         } else {
-            if (flag === 'd')
-                generateGraph(arr[1]);
-            else if (flag === 'r')
-                generateGraph(arr[2]);
-            else
-                generateGraph(arr[0]);
+            generateGraph(arr[0]);
         }
     }).catch(err => console.error(err));
 
