@@ -14,6 +14,8 @@ function openImage() {
         exec('xdg-open 1.jpeg');
     } else if (process.platform === 'darwin') {
         exec('open 1.jpeg');
+    } else if (process.platform === 'android') {
+        exec('xdg-open 1.jpeg');
     }
 }
 
