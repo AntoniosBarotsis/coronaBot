@@ -265,7 +265,7 @@ function cv(args, message) {
                 borderColor: utility.getGraphColor(flag),
             };
             dataset2 = {
-                label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
+                label: `${utility.getGraphLabel(country[1], flag)} ${extraStr}`,
                 data: values[1],
                 fill: false,
                 backgroundColor: utility.getGraphColor2(flag),
