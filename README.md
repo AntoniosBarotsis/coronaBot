@@ -48,6 +48,9 @@ plots with that data.
         Plots a logarithmic graph instead of a linear one. Can be combined with ``compare``.
     -top\
         Plots a bar graph with the top 10 countries in terms of c/r/d cases. By default it plots the top 10.
+    -combined\ 
+        Plots a line chart with recovered, deaths and active cases. If you include `` c``,' +
+        'confirmed cases are included in the graph as well.
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
@@ -81,3 +84,6 @@ Create a branch, add commits, and [open a pull request](https://github.com/Anton
 
 - ```.cv top 20```\
 ![bruh](/images/7.jpeg)
+
+- ```.cv spain combined c```
+![bruh](/images/8.jpeg)
