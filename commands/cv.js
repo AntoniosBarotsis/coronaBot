@@ -1,5 +1,5 @@
 const prefix = process.env.prefix;
-const main = require('./../data/main');
+const main = require('./../main');
 
 module.exports = {
     name: 'cv',
@@ -11,7 +11,8 @@ module.exports = {
         ' - pie: Returns a pie chart (this is always c)\n' +
         ' - change: Returns a line chart showing the rate of change or the corresponding modifier' +
         ' - compare: allows you to query 2 countries. Example: ``.cv r greece compare romania``' +
-        ' - log: plots logarithmic graphs instead',
+        ' - log: plots logarithmic graphs instead' +
+        ' - combined (c):',
     show: true,
     execute: function(message, args) {
         main.cv(args, message);

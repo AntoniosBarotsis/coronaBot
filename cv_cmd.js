@@ -1,7 +1,7 @@
 module.exports = { openImage };
 
 const exec = require('child_process').exec;
-const main = require('./data/main');
+const main = require('./main.js');
 
 /**
  * Opens the image

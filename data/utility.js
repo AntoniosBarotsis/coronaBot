@@ -1,6 +1,6 @@
-module.exports = {getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
-    filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getGraphPieCountry,
-    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel};
+module.exports = { getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
+    filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getCountry,
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel, getActiveCases };
 
 const fs = require('fs');
 
@@ -302,11 +302,11 @@ function populationData(populationC_unchecked, populationD_unchecked, population
  * @param country
  * @returns {string}
  */
-function getGraphPieCountry(country) {
+function getCountry(country) {
     if (country === 'all')
-        return 'all countries';
+        return 'All countries';
     else if (country === 'other')
-        return 'all countries except China';
+        return 'All countries except China';
     else
         return country.charAt(0).toUpperCase() + country.slice(1);
 }
@@ -409,4 +409,32 @@ function getBarLabel(flag) {
         return 'Recovered cases';
     else
         return 'Deaths';
+}
+
+function getActiveCases(confirmed, deaths, recovered) {
+    let active = [];
+    let deathValues = [];
+    let recoveredValues = [];
+
+    for (let i = 0; i < confirmed.length - deaths.length; i++) {
+        deathValues[i] = 0;
+    }
+
+    for (let i = 0; i < confirmed.length - recovered.length; i++) {
+        recoveredValues[i] = 0;
+    }
+
+    deaths.forEach(el => deathValues.push(el.value));
+    recovered.forEach(el => recoveredValues.push(el.value));
+
+    for (let i = 0; i < confirmed.length; i++)
+        active.push({
+            date: confirmed[i].date,
+            active: confirmed[i].value - deathValues[i] - recoveredValues[i],
+            deaths: deathValues[i],
+            recovered: recoveredValues[i],
+            confirmed: confirmed[i].value,
+        });
+
+    return active;
 }

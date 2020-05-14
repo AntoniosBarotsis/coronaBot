@@ -305,17 +305,17 @@ describe('populationData', () => {
     });
 });
 
-describe('getGraphPieCountry', () => {
+describe('getCountry', () => {
     it('all', async() => {
-        expect(utility.getGraphPieCountry('all')).toStrictEqual('all countries');
+        expect(utility.getCountry('all')).toStrictEqual('All countries');
     });
 
     it('other', async() => {
-        expect(utility.getGraphPieCountry('other')).toStrictEqual('all countries except China');
+        expect(utility.getCountry('other')).toStrictEqual('All countries except China');
     });
 
     it('Greece', async() => {
-        expect(utility.getGraphPieCountry('greece')).toStrictEqual('Greece');
+        expect(utility.getCountry('greece')).toStrictEqual('Greece');
     });
 });
 
@@ -417,5 +417,112 @@ describe('getBarLabel', () => {
 
     it('Should return confirmed for r', async() => {
         expect(utility.getBarLabel('r')).toStrictEqual('Recovered cases');
+    });
+});
+
+describe('getActiveCases', () => {
+    let confirmed = [{
+        date: '1',
+        value: 5,
+    }, {
+        date: '2',
+        value: 10,
+    }, {
+        date: '3',
+        value: 15,
+    }];
+
+    let deaths = [{
+        date: '1',
+        value: 2,
+    }, {
+        date: '2',
+        value: 4,
+    }, {
+        date: '3',
+        value: 7,
+    }];
+
+    let recovered = [{
+        date: '1',
+        value: 2,
+    }, {
+        date: '2',
+        value: 4,
+    }, {
+        date: '3',
+        value: 7,
+    }];
+
+    let active1 = [{
+        date: '1',
+        active: 1,
+        confirmed: 5,
+        deaths: 2,
+        recovered: 2,
+    }, {
+        date: '2',
+        active: 2,
+        confirmed: 10,
+        deaths: 4,
+        recovered: 4,
+    }, {
+        date: '3',
+        active: 1,
+        confirmed: 15,
+        deaths: 7,
+        recovered: 7,
+    }];
+
+    let active2 = [{
+        date: '1',
+        active: 3,
+        confirmed: 5,
+        deaths: 0,
+        recovered: 2,
+    }, {
+        date: '2',
+        active: 2,
+        confirmed: 10,
+        deaths: 4,
+        recovered: 4,
+    }, {
+        date: '3',
+        active: 1,
+        confirmed: 15,
+        deaths: 7,
+        recovered: 7,
+    }];
+
+    let active3 = [{
+        date: '1',
+        active: 5,
+        confirmed: 5,
+        deaths: 0,
+        recovered: 0,
+    }, {
+        date: '2',
+        active: 2,
+        confirmed: 10,
+        deaths: 4,
+        recovered: 4,
+    }, {
+        date: '3',
+        active: 1,
+        confirmed: 15,
+        deaths: 7,
+        recovered: 7,
+    }];
+
+    it('Should work for same length', async() => {
+        expect(utility.getActiveCases(confirmed, deaths, recovered)).toStrictEqual(active1);
+    });
+
+    it('Should work for 1 different length', async() => {
+        expect(utility.getActiveCases(confirmed, deaths.slice(1), recovered)).toStrictEqual(active2);
+    });
+
+    it('Should work for 2 different lengths', async() => {
+        expect(utility.getActiveCases(confirmed, deaths.slice(1), recovered.slice(1))).toStrictEqual(active3);
     });
 });
