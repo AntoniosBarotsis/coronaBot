@@ -4,12 +4,12 @@ const { StringStream } = require('scramjet');
 const request = require('request');
 const axios = require('axios');
 const fs = require('fs');
-const population = require('./population');
+const population = require('./data/population.json');
 const recovered = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
 const confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
-const cv_cmd = require('./../cv_cmd');
-const utility = require('./utility');
+const cv_cmd = require('./cv_cmd');
+const utility = require('./data/utility.js');
 
 function cv(args, message) {
     // console.time('Entire cv command');
@@ -33,9 +33,9 @@ function cv(args, message) {
 
     let country = [];
     if (args[0] === 'c' || args[0] === 'r' || args[0] === 'd') { // One of the default chars was used, remove it.
-        country[0] = args.join(' ').replace(/,/g, ' ').replace(args[0] + ' ', '');
+        country[0] = args.join(' ').replace(/,/g, ' ').replace(args[0] + ' ', '').trim();
     } else { // Country isn't polluted by a url modifier.
-        country[0] = args.join(' ').replace(/,/g, ' ');
+        country[0] = args.join(' ').replace(/,/g, ' ').trim();
     }
 
     let pie = false;
@@ -43,6 +43,9 @@ function cv(args, message) {
     let compare = false;
     let logarithmic = false;
     let top = false;
+    let combined = false;
+    let combinedConfirmed = false;
+    let active = false;
     let countryP = [];
     let topNumber;
 
@@ -60,7 +63,20 @@ function cv(args, message) {
         logarithmic = true;
     }
 
-    if (country[0].includes(' pie')) {
+    if (country[0].includes(' active')) {
+        country[0] = country[0].replace(' active', '');
+        active = true;
+        countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country[0]));
+    }
+
+    if (country[0].includes(' combined')) {
+        if (country[0].match(/ c$/)) {
+            combinedConfirmed = true;
+            country[0] = country[0].replace(/ c$/, '');
+        }
+        country[0] = country[0].replace(' combined', '');
+        combined = true;
+    } else if (country[0].includes(' pie')) {
         country[0] = country[0].replace(' pie', '');
         pie = true;
         countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country[0]));
@@ -86,7 +102,7 @@ function cv(args, message) {
     if (message)
         message.channel.startTyping();
 
-    if (pie) {
+    if (pie || combined || active) {
         urlData.push(getData(confirmed));
         urlData.push(getData(deaths));
         urlData.push(getData(recovered));
@@ -110,6 +126,20 @@ function cv(args, message) {
             let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
                 arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
             generatePieChart(populationData);
+        } else if (combined && !compare) {
+            let combinedCases = utility.getCombinedCases(arr[0][0], arr[1][0], arr[2][0]);
+            generateGraphCombined(combinedCases);
+        } else if (active && !compare) {
+            let activeArr = utility.getCombinedCases(arr[0][0], arr[1][0], arr[2][0]);
+            let activeFinal = [];
+
+            activeArr.forEach(({ active, date }) => {
+                activeFinal.push({
+                    date: date,
+                    value: active,
+                });
+            });
+            generateGraph([activeFinal]);
         } else {
             generateGraph(arr[0]);
         }
@@ -243,7 +273,7 @@ function cv(args, message) {
                 values[1] = utility.getChange(values[1]);
             }
 
-            dates[0] = dates[0].length > dates[1].length ? dates[0] : dates[1];
+            dates[0] = (dates[0].length > dates[1].length) ? dates[0] : dates[1];
 
             if (values[0].length > values[1].length) {
                 let difference = values[0].length - values[1].length;
@@ -279,8 +309,9 @@ function cv(args, message) {
             dataset = {
                 label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: valuesChange,
-                fill: true,
+                fill: false,
                 backgroundColor: utility.getGraphColor(flag),
+                borderColor: utility.getGraphColor(flag),
             };
 
             datasets.push(dataset);
@@ -288,8 +319,9 @@ function cv(args, message) {
             dataset = {
                 label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: values[0],
-                fill: !(logarithmic),
-                backgroundColor: utility.getGraphColor(flag),
+                fill: false,
+                backgroundColor: (active) ? utility.getGraphColor('c') : utility.getGraphColor(flag),
+                borderColor: (active) ? utility.getGraphColor('c') : utility.getGraphColor(flag),
             };
 
             datasets.push(dataset);
@@ -364,7 +396,7 @@ function cv(args, message) {
                 options: {
                     title: {
                         display: true,
-                        text: `Confirmed cases in ${utility.getGraphPieCountry(country[0])}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
+                        text: `Confirmed cases in ${utility.getCountry(country[0])}: ${objectData.populationC} (${objectData.confirmedOverPop}%)`,
                     },
                     legend: {
                         labels: {
@@ -412,6 +444,78 @@ function cv(args, message) {
                     title: {
                         display: true,
                         text: `Top ${topNumber} countries ${str}`,
+                    },
+                    legend: {
+                        labels: {
+                            fontColor: 'white',
+                        },
+                    },
+                },
+            },
+        };
+
+        getChart(chartData);
+    }
+
+    function generateGraphCombined(arr) {
+        let labels = [];
+        let active = [];
+        let deaths = [];
+        let recovered = [];
+        let confirmed = [];
+
+        for (let i = 0; i < arr.length; i++) {
+            labels.push(arr[i].date);
+            active.push(arr[i].active);
+            deaths.push(arr[i].deaths);
+            recovered.push(arr[i].recovered);
+            confirmed.push(arr[i].confirmed);
+        }
+
+        let datasets = [{
+            label: 'Active',
+            backgroundColor: utility.getGraphColor('c'),
+            borderColor: utility.getGraphColor('c'),
+            data: active,
+            fill: false,
+        }, {
+            label: 'Recovered',
+            backgroundColor: utility.getGraphColor('r'),
+            borderColor: utility.getGraphColor('r'),
+            data: recovered,
+            fill: false,
+        }, {
+            label: 'Deaths',
+            backgroundColor: utility.getGraphColor('d'),
+            borderColor: utility.getGraphColor('d'),
+            data: deaths,
+            fill: false,
+        }];
+
+        if (combinedConfirmed)
+            datasets.unshift({
+                label: 'Confirmed',
+                backgroundColor: utility.getGraphColor2('c'),
+                borderColor: utility.getGraphColor2('c'),
+                data: confirmed,
+                fill: false,
+            });
+
+        const chartData = {
+            backgroundColor: 'rgba(44,47,51, 1)',
+            width: 1000,
+            height: 500,
+            format: 'jpg',
+            chart: {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets,
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: utility.getCountry(country[0]),
                     },
                     legend: {
                         labels: {
