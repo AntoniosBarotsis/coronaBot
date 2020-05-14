@@ -51,6 +51,8 @@ plots with that data.
     - combined\
         Plots a line chart with recovered, deaths and active cases. If you include `` c``, 
         confirmed cases are included in the graph as well.
+    - active\
+        Plots a line chart with the active cases over time
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
