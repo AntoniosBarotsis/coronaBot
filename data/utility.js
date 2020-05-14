@@ -1,6 +1,6 @@
 module.exports = { getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getCountry,
-    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel, getActiveCases };
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel, getCombinedCases };
 
 const fs = require('fs');
 
@@ -411,7 +411,7 @@ function getBarLabel(flag) {
         return 'Deaths';
 }
 
-function getActiveCases(confirmed, deaths, recovered) {
+function getCombinedCases(confirmed, deaths, recovered) {
     let active = [];
     let deathValues = [];
     let recoveredValues = [];

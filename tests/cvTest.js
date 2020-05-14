@@ -420,7 +420,7 @@ describe('getBarLabel', () => {
     });
 });
 
-describe('getActiveCases', () => {
+describe('getCombinedCases', () => {
     let confirmed = [{
         date: '1',
         value: 5,
@@ -515,14 +515,14 @@ describe('getActiveCases', () => {
     }];
 
     it('Should work for same length', async() => {
-        expect(utility.getActiveCases(confirmed, deaths, recovered)).toStrictEqual(active1);
+        expect(utility.getCombinedCases(confirmed, deaths, recovered)).toStrictEqual(active1);
     });
 
     it('Should work for 1 different length', async() => {
-        expect(utility.getActiveCases(confirmed, deaths.slice(1), recovered)).toStrictEqual(active2);
+        expect(utility.getCombinedCases(confirmed, deaths.slice(1), recovered)).toStrictEqual(active2);
     });
 
     it('Should work for 2 different lengths', async() => {
-        expect(utility.getActiveCases(confirmed, deaths.slice(1), recovered.slice(1))).toStrictEqual(active3);
+        expect(utility.getCombinedCases(confirmed, deaths.slice(1), recovered.slice(1))).toStrictEqual(active3);
     });
 });

@@ -45,6 +45,7 @@ function cv(args, message) {
     let top = false;
     let combined = false;
     let combinedConfirmed = false;
+    let active = false;
     let countryP = [];
     let topNumber;
 
@@ -60,6 +61,12 @@ function cv(args, message) {
     if (country[0].includes('log')) {
         country[0] = country[0].replace(' log', '');
         logarithmic = true;
+    }
+
+    if (country[0].includes(' active')) {
+        country[0] = country[0].replace(' active', '');
+        active = true;
+        countryP = utility.replaceKnownCountryPie(utility.removeMaliciousChars(country[0]));
     }
 
     if (country[0].includes(' combined')) {
@@ -95,7 +102,7 @@ function cv(args, message) {
     if (message)
         message.channel.startTyping();
 
-    if (pie || combined) {
+    if (pie || combined || active) {
         urlData.push(getData(confirmed));
         urlData.push(getData(deaths));
         urlData.push(getData(recovered));
@@ -119,9 +126,20 @@ function cv(args, message) {
             let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
                 arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
             generatePieChart(populationData);
-        } else if (combined) {
-            let activeCases = utility.getActiveCases(arr[0][0], arr[1][0], arr[2][0]);
-            generateGraphCombined(activeCases);
+        } else if (combined && !compare) {
+            let combinedCases = utility.getCombinedCases(arr[0][0], arr[1][0], arr[2][0]);
+            generateGraphCombined(combinedCases);
+        } else if (active) {
+            let activeArr = utility.getCombinedCases(arr[0][0], arr[1][0], arr[2][0]);
+            let activeFinal = [];
+
+            activeArr.forEach(({ active, date }) => {
+                activeFinal.push({
+                    date: date,
+                    value: active,
+                });
+            });
+            generateGraph([activeFinal]);
         } else {
             generateGraph(arr[0]);
         }
@@ -302,8 +320,8 @@ function cv(args, message) {
                 label: `${utility.getGraphLabel(country[0], flag)} ${extraStr}`,
                 data: values[0],
                 fill: false,
-                backgroundColor: utility.getGraphColor(flag),
-                borderColor: utility.getGraphColor(flag),
+                backgroundColor: (active) ? utility.getGraphColor('c') : utility.getGraphColor(flag),
+                borderColor: (active) ? utility.getGraphColor('c') : utility.getGraphColor(flag),
             };
 
             datasets.push(dataset);
