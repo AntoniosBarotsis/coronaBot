@@ -129,7 +129,7 @@ function cv(args, message) {
         } else if (combined && !compare) {
             let combinedCases = utility.getCombinedCases(arr[0][0], arr[1][0], arr[2][0]);
             generateGraphCombined(combinedCases);
-        } else if (active) {
+        } else if (active && !compare) {
             let activeArr = utility.getCombinedCases(arr[0][0], arr[1][0], arr[2][0]);
             let activeFinal = [];
 
