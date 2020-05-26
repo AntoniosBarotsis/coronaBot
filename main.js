@@ -43,6 +43,7 @@ function cv(args, message) {
     let compare = false;
     let logarithmic = false;
     let top = false;
+    let topByMortality = false;
     let combined = false;
     let combinedConfirmed = false;
     let active = false;
@@ -87,6 +88,9 @@ function cv(args, message) {
         }
 
         if (country[0].includes('top')) {
+            if (country[0].includes('m'))
+                topByMortality = true;
+
             country[0] = 'all';
             top = true;
         } else if (country[0].includes('compare')) {
@@ -106,6 +110,9 @@ function cv(args, message) {
         urlData.push(getData(confirmed));
         urlData.push(getData(deaths));
         urlData.push(getData(recovered));
+    } else if (topByMortality) {
+        urlData.push(getData(confirmed));
+        urlData.push(getData(deaths));
     } else {
         switch (flag) {
         case 'c':
@@ -121,7 +128,8 @@ function cv(args, message) {
 
     Promise.all(urlData).then(arr => {
         if (top) {
-            generateBarChart(arr, flag, topNumber, top);
+
+            generateBarChart(arr, change, topByMortality);
         } else if (pie) {
             let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
                 arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
@@ -160,7 +168,7 @@ function cv(args, message) {
                     let finalArray;
 
                     if (top) {
-                        finalArray = getTopCases(rows);
+                        finalArray = utility.getTopCases(rows, change, topByMortality);
                     } else {
                         const arr = sumCases(rows, country); // Generates the array we want
                         // Filters out stuff, configure this as you like
@@ -199,32 +207,6 @@ function cv(args, message) {
             }
         }
         return initialRow;
-    }
-
-    /**
-     * Gets the last recorded number of each country
-     * @param arr
-     * @returns {country, biggestValue}
-     */
-    function getTopCases(arr) {
-        let finalArr = [];
-        let summedObj = {};
-        for (let i = 1; i < arr.length; i++) {
-            let currentCountry = arr[i][1] ? arr[i][1] : arr[i][0];
-            let biggestValue = (change) ? arr[i][arr[i].length - 1] - arr[i][arr[i].length - 2] : arr[i][arr[i].length - 1];
-
-            if (summedObj.hasOwnProperty(currentCountry)) {
-                summedObj[currentCountry] = summedObj[currentCountry] + parseInt(biggestValue, 10);
-            } else
-                summedObj[currentCountry] = parseInt(biggestValue, 10);
-        }
-
-        for (let i in summedObj)
-            finalArr.push({country: i, biggestValue: summedObj[i]});
-
-        return finalArr.sort((a, b) => {
-            return b.biggestValue - a.biggestValue;
-        });
     }
 
     /**
@@ -418,12 +400,18 @@ function cv(args, message) {
         let labels = [];
         let values = [];
 
+        if (topByMortality)
+            arr = utility.getMortality(arr);
+
+        // console.log(arr);
+
         for (let i = 0; i < topNumber; i++) {
             labels[i] = arr[0][i].country;
             values[i] = arr[0][i].biggestValue;
         }
 
-        let str = (change) ? '(by rate of change of the last day)' : '';
+        let str = (topByMortality) ? 'by mortality rate' : '';
+        str += (change) ? '(by rate of change of the last day)' : '';
 
         const chartData = {
             backgroundColor: 'rgba(44,47,51, 1)',
@@ -435,8 +423,8 @@ function cv(args, message) {
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: utility.getBarLabel(flag),
-                        backgroundColor: utility.getGraphColor(flag),
+                        label: (topByMortality) ? 'Mortality rate' : 'Confirmed cases',
+                        backgroundColor: utility.getGraphColor((topByMortality) ? 'd' : 'c'),
                         data: values,
                     }],
                 },

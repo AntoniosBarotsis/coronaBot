@@ -1,6 +1,6 @@
 module.exports = { getChange, replaceKnownCountry, getGraphLabel, getGraphColor, getGraphColor2, formatForGraph, filterCasesDecreasing,
     filterCasesDupes, filterCasesEmpty, includesCountry, sumRows, getRowData, getPopulation, populationData, getCountry,
-    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel, getCombinedCases };
+    replaceKnownCountryPie, removeMaliciousChars, shouldRefreshFile, getFileDate, shouldSum, getBarLabel, getCombinedCases, getTopCases, getMortality };
 
 const fs = require('fs');
 
@@ -437,4 +437,71 @@ function getCombinedCases(confirmed, deaths, recovered) {
         });
 
     return active;
+}
+
+/**
+ * Gets the last recorded number of each country
+ * @param arr
+ * @returns {country, biggestValue}
+ */
+function getTopCases(arr, change, topByMortality) {
+    let finalArr = [];
+    let summedObj = {};
+
+    for (let i = 1; i < arr.length; i++) {
+        let currentCountry = arr[i][1] ? arr[i][1] : arr[i][0];
+
+        // if (currentCountry === 'Belgium') {
+        //     console.log(arr[i][arr[i].length - 1])
+        // }
+
+
+        let biggestValue = (change) ? arr[i][arr[i].length - 1] - arr[i][arr[i].length - 2] : arr[i][arr[i].length - 1];
+
+        // if (currentCountry === 'Belgium') {
+        //     console.log(biggestValue)
+        // }
+
+        if (summedObj.hasOwnProperty(currentCountry)) {
+            summedObj[currentCountry] = summedObj[currentCountry] + parseInt(biggestValue, 10);
+        } else
+            summedObj[currentCountry] = parseInt(biggestValue, 10);
+    }
+
+    for (let i in summedObj)
+        finalArr.push({country: i, biggestValue: summedObj[i]});
+
+    if (!topByMortality)
+        return finalArr.sort((a, b) => {
+            return b.biggestValue - a.biggestValue;
+        });
+    else
+        return finalArr;
+}
+
+/**
+ * Sorts the array based on the mortality rate
+ * @param {*} arr
+ * @returns {finalArr}
+ */
+function getMortality(arr) {
+    let finalArr = [];
+
+    // console.log(arr);
+
+    for (let i = 0; i < arr[0].length; i++) {
+        let value = (arr[0][i] === 0) ? 0 : arr[1][i].biggestValue * 100 / arr[0][i].biggestValue;
+
+        if (arr[0][i].country === 'Belgium')
+            console.log(arr[0][i].biggestValue, arr[1][i].biggestValue)
+
+        finalArr.push({
+            country: arr[0][i].country,
+            biggestValue: value,
+        });
+    }
+
+    return [finalArr.sort((a, b) => {
+        return b.biggestValue - a.biggestValue;
+    })];
 }
