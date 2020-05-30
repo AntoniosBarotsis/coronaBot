@@ -48,16 +48,20 @@ function cv(args, message) {
     let combinedConfirmed = false;
     let active = false;
     let countryP = [];
-    let topNumber;
+    let topNumber = 10;
+    let topReverse = false;
 
     // Checks if user inputted any number for the top case
-    let tmpTopNumber = '';
-    for (let i in country[0]) {
-        if (country[0][i].match(/[0-9]/)) {
-            tmpTopNumber = tmpTopNumber + country[0][i];
-        }
+
+    let tmp = country[0].split(' ');
+    for (let i in tmp) {
+        if (tmp[i].match(/[0-9]/))
+            topNumber = tmp[i];
+        else if (tmp[i] === 'r')
+            topReverse = true;
     }
-    topNumber = tmpTopNumber > 0 ? tmpTopNumber : 10; // By default top will display the top countries
+
+    // // console.log(topReverse)
 
     if (country[0].includes('log')) {
         country[0] = country[0].replace(' log', '');
@@ -128,8 +132,7 @@ function cv(args, message) {
 
     Promise.all(urlData).then(arr => {
         if (top) {
-
-            generateBarChart(arr, change, topByMortality);
+            generateBarChart(arr, change, topByMortality, topReverse);
         } else if (pie) {
             let populationData = utility.populationData(arr[0][0][arr[0][0].length - 1], arr[1][0][arr[1][0].length - 1],
                 arr[2][0][arr[2][0].length - 1], utility.getPopulation(countryP, population));
@@ -168,7 +171,7 @@ function cv(args, message) {
                     let finalArray;
 
                     if (top) {
-                        finalArray = utility.getTopCases(rows, change, topByMortality);
+                        finalArray = utility.getTopCases(rows, change, topByMortality, topReverse);
                     } else {
                         const arr = sumCases(rows, country); // Generates the array we want
                         // Filters out stuff, configure this as you like
@@ -396,12 +399,12 @@ function cv(args, message) {
      * Generates a bar chart with the top n countries
      * @param arr
      */
-    function generateBarChart(arr) {
+    function generateBarChart(arr, change, topByMortality, topReverse) {
         let labels = [];
         let values = [];
 
         if (topByMortality)
-            arr = utility.getMortality(arr);
+            arr = utility.getMortality(arr, topReverse);
 
         // console.log(arr);
 

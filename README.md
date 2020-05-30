@@ -46,11 +46,16 @@ plots with that data.
         Note that you can combine ``change`` and ``compare`` like so: ``.cv spain compare italy change``.
     - log\
         Plots a logarithmic graph instead of a linear one. Can be combined with ``compare``.
-    -top\
-        Plots a bar graph with the top 10 countries in terms of c/r/d cases. By default it plots the top 10.
-    -combined\ 
+    - top\
+        Plots a bar graph with the top 10 countries in terms of c/r/d cases. By default it plots the top 10.\
+        Extra arguments:
+        - \[number of countries\]: changes the amount of countries displayed
+        - m: Sorts countries by mortality rate
+        - r: Shows countries in reverse order
+    - combined\
         Plots a line chart with recovered, deaths and active cases. If you include `` c``,' +
         'confirmed cases are included in the graph as well.
+        
         
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     

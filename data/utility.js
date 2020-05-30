@@ -444,23 +444,13 @@ function getCombinedCases(confirmed, deaths, recovered) {
  * @param arr
  * @returns {country, biggestValue}
  */
-function getTopCases(arr, change, topByMortality) {
+function getTopCases(arr, change, topByMortality, topReverse) {
     let finalArr = [];
     let summedObj = {};
 
     for (let i = 1; i < arr.length; i++) {
         let currentCountry = arr[i][1] ? arr[i][1] : arr[i][0];
-
-        // if (currentCountry === 'Belgium') {
-        //     console.log(arr[i][arr[i].length - 1])
-        // }
-
-
         let biggestValue = (change) ? arr[i][arr[i].length - 1] - arr[i][arr[i].length - 2] : arr[i][arr[i].length - 1];
-
-        // if (currentCountry === 'Belgium') {
-        //     console.log(biggestValue)
-        // }
 
         if (summedObj.hasOwnProperty(currentCountry)) {
             summedObj[currentCountry] = summedObj[currentCountry] + parseInt(biggestValue, 10);
@@ -471,12 +461,18 @@ function getTopCases(arr, change, topByMortality) {
     for (let i in summedObj)
         finalArr.push({country: i, biggestValue: summedObj[i]});
 
-    if (!topByMortality)
-        return finalArr.sort((a, b) => {
-            return b.biggestValue - a.biggestValue;
-        });
-    else
-        return finalArr;
+    if (!topByMortality) {
+        if (topReverse)
+            finalArr = finalArr.sort((a, b) => {
+                return a.biggestValue - b.biggestValue;
+            });
+        else
+            finalArr = finalArr.sort((a, b) => {
+                return b.biggestValue - a.biggestValue;
+            });
+    }
+
+    return finalArr;
 }
 
 /**
@@ -484,16 +480,11 @@ function getTopCases(arr, change, topByMortality) {
  * @param {*} arr
  * @returns {finalArr}
  */
-function getMortality(arr) {
+function getMortality(arr, topReverse) {
     let finalArr = [];
-
-    // console.log(arr);
 
     for (let i = 0; i < arr[0].length; i++) {
         let value = (arr[0][i] === 0) ? 0 : arr[1][i].biggestValue * 100 / arr[0][i].biggestValue;
-
-        if (arr[0][i].country === 'Belgium')
-            console.log(arr[0][i].biggestValue, arr[1][i].biggestValue)
 
         finalArr.push({
             country: arr[0][i].country,
@@ -501,7 +492,14 @@ function getMortality(arr) {
         });
     }
 
-    return [finalArr.sort((a, b) => {
-        return b.biggestValue - a.biggestValue;
-    })];
+    if (topReverse) {
+        finalArr = finalArr.sort((a, b) => {
+            return a.biggestValue - b.biggestValue;
+        });
+    } else
+        finalArr = finalArr.sort((a, b) => {
+            return b.biggestValue - a.biggestValue;
+        });
+
+    return [finalArr];
 }
