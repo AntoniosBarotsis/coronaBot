@@ -56,7 +56,6 @@ plots with that data.
         Plots a line chart with recovered, deaths and active cases. If you include `` c``,' +
         'confirmed cases are included in the graph as well.
         
-        
 You can always use ``.help`` and ``.help [command]`` for a list of commands + usage.
     
 ## Support
