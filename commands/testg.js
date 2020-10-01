@@ -1,5 +1,5 @@
 const fs = require('fs');
-const axios = require('axios');
+const { CanvasRenderService } = require('chartjs-node-canvas');
 
 module.exports = {
     name: 'testg',
@@ -37,7 +37,6 @@ module.exports = {
             backgroundColor: 'rgba(44,47,51, 1)',
             width: 1000,
             height: 500,
-            format: 'jpg',
             chart: {
                 type: 'line',
                 data: {
@@ -64,25 +63,20 @@ module.exports = {
             },
         };
 
-        axios({
-            method: 'post',
-            url: 'https://quickchart.io/chart',
-            responseType: 'stream',
-            data: chartData,
-        })
-            .then((res) => {
-                // pipe image into writestream and send image when done
-                res.data.pipe(fs.createWriteStream('1.jpeg'))
-                    .on('finish', () => {
-                        message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
-                    })
-                    .on('error', () => {
-                        // if can't convert to pic, do error func here
-                    });
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        const canvasRenderService = new CanvasRenderService(
+            chartData.width,
+            chartData.height,
+        );
+
+        canvasRenderService.renderToBuffer(
+            chartData.chart,
+            'image/png',
+        ).then(buffer => {
+            fs.writeFileSync('1.png', buffer);
+            message.channel.send({ files: ['1.png'] }).then(message.channel.stopTyping());
+        }).catch((err) => {
+            console.error(err);
+        });
 
     // function formatDates(arr) {
     //     let ret = [];
