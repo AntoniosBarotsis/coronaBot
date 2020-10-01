@@ -9,13 +9,13 @@ const main = require('./main.js');
 
 function openImage() {
     if (process.platform === 'win32') {
-        exec('1.jpeg');
+        exec('1.png');
     } else if (process.platform === 'linux') {
-        exec('xdg-open 1.jpeg');
+        exec('xdg-open 1.png');
     } else if (process.platform === 'darwin') {
-        exec('open 1.jpeg');
+        exec('open 1.png');
     } else if (process.platform === 'android') {
-        exec('xdg-open 1.jpeg');
+        exec('xdg-open 1.png');
     }
 }
 

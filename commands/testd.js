@@ -3,7 +3,7 @@ const confirmed = 'http://raw.githubusercontent.com/CSSEGISandData/COVID-19/mast
 const deaths = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
+const request = require('request');
 const utility = require('./../data/utility');
 
 module.exports = {
@@ -20,13 +20,7 @@ module.exports = {
         async function download(url, str) {
             const filePath = path.resolve(__dirname, 'downloads', `${str}.csv`);
             const writer = fs.createWriteStream(filePath);
-            const response = await axios({
-                url: url,
-                method: 'GET',
-                responseType: 'stream',
-            });
-
-            response.data.pipe(writer);
+            request.get(url).pipe(writer);
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', resolve);

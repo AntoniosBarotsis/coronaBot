@@ -2,7 +2,7 @@ module.exports = {cv};
 
 const { StringStream } = require('scramjet');
 const request = require('request');
-const axios = require('axios');
+const { CanvasRenderService } = require('chartjs-node-canvas');
 const fs = require('fs');
 const population = require('./data/population.json');
 const recovered = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv';
@@ -329,7 +329,6 @@ function cv(args, message) {
             backgroundColor: 'rgba(44,47,51, 1)',
             width: 1000,
             height: 500,
-            format: 'jpg',
             chart: {
                 type: 'line',
                 data: {
@@ -340,6 +339,27 @@ function cv(args, message) {
                     scales: {
                         yAxes: [{
                             type: logarithmic ? 'logarithmic' : 'linear',
+                            ticks: {
+                                autoSkip: false,
+                                callback: value => {
+                                    if (logarithmic) {
+                                        // For every value get a base-10 mark
+                                        // by looking at the length of the value
+                                        let mark = Math.pow(10, String(value).length - 1);
+
+                                        // Use this mark to select only exact
+                                        // values on the Y axis. Since the axis
+                                        // is logarithmic, it makes sense to
+                                        // pick points at the beginning and
+                                        // 1/3 of the grid segment.
+                                        if (value === mark || value === mark * 3) {
+                                            return value.toLocaleString('en-US');
+                                        }
+                                    } else {
+                                        return value.toLocaleString('en-US');
+                                    }
+                                },
+                            },
                         }],
                     },
                     legend: {
@@ -368,7 +388,6 @@ function cv(args, message) {
             backgroundColor: 'rgba(44,47,51, 1)',
             width: 1000,
             height: 500,
-            format: 'jpg',
             chart: {
                 type: 'doughnut',
                 data: {
@@ -420,7 +439,6 @@ function cv(args, message) {
             backgroundColor: 'rgba(44,47,51, 1)',
             width: 1000,
             height: 500,
-            format: 'jpg',
             chart: {
                 type: 'bar',
                 data: {
@@ -496,7 +514,6 @@ function cv(args, message) {
             backgroundColor: 'rgba(44,47,51, 1)',
             width: 1000,
             height: 500,
-            format: 'jpg',
             chart: {
                 type: 'line',
                 data: {
@@ -525,26 +542,28 @@ function cv(args, message) {
      * @param chartData
      */
     function getChart(chartData) {
-        axios({
-            method: 'post',
-            url: 'https://quickchart.io/chart',
-            responseType: 'stream',
-            data: chartData,
-        })
-            .then((res) => {
-                // pipe image into writestream and send image when done
-                res.data.pipe(fs.createWriteStream('1.jpeg'))
-                    .on('finish', () => {
-                        // console.timeEnd('Entire cv command');
-
-                        if (message)
-                            message.channel.send({ files: ['1.jpeg'] }).then(message.channel.stopTyping());
-                        else
-                            cv_cmd.openImage();
-                    });
-            })
-            .catch((err) => {
-                console.error(err);
+        const canvasRenderService = new CanvasRenderService(
+            chartData.width,
+            chartData.height,
+            (ChartJS) => {
+                ChartJS.plugins.register({
+                    beforeDraw: chart => {
+                        const ctx = chart.ctx;
+                        ctx.fillStyle = chartData.backgroundColor;
+                        ctx.fillRect(0, 0, chartData.width, chartData.height);
+                    },
+                });
             });
+
+        canvasRenderService.renderToBuffer(
+            chartData.chart,
+            'image/png',
+        ).then(buffer => {
+            fs.writeFileSync('1.png', buffer);
+            if (message)
+                message.channel.send({ files: ['1.png'] }).then(message.channel.stopTyping());
+            else
+                cv_cmd.openImage();
+        });
     }
 }
