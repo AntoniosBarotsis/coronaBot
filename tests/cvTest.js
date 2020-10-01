@@ -369,7 +369,7 @@ describe('shouldRefreshFile', () => {
         let today = new Date();
         let value = {
             month: today.getMonth(),
-            day: today.getDay(),
+            day: today.getDate(),
             hour: today.getHours(),
         };
         expect(utility.shouldRefreshFile(value)).toBe(true);
@@ -379,7 +379,7 @@ describe('shouldRefreshFile', () => {
         let today = new Date();
         let value = {
             month: today.getMonth() + 1,
-            day: today.getDay() - 1,
+            day: today.getDate() - 1,
             hour: today.getHours(),
         };
         expect(utility.shouldRefreshFile(value)).toBe(true);
@@ -389,7 +389,7 @@ describe('shouldRefreshFile', () => {
         let today = new Date();
         let value = {
             month: today.getMonth() + 1,
-            day: today.getDay(),
+            day: today.getDate(),
             hour: today.getHours() - 6,
         };
         expect(utility.shouldRefreshFile(value)).toBe(true);
