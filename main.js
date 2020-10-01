@@ -339,6 +339,27 @@ function cv(args, message) {
                     scales: {
                         yAxes: [{
                             type: logarithmic ? 'logarithmic' : 'linear',
+                            ticks: {
+                                autoSkip: false,
+                                callback: value => {
+                                    if (logarithmic) {
+                                        // For every value get a base-10 mark
+                                        // by looking at the length of the value
+                                        let mark = Math.pow(10, String(value).length - 1);
+
+                                        // Use this mark to select only exact
+                                        // values on the Y axis. Since the axis
+                                        // is logarithmic, it makes sense to
+                                        // pick points at the beginning and
+                                        // 1/3 of the grid segment.
+                                        if (value === mark || value === mark * 3) {
+                                            return value.toLocaleString('en-US');
+                                        }
+                                    } else {
+                                        return value.toLocaleString('en-US');
+                                    }
+                                },
+                            },
                         }],
                     },
                     legend: {
