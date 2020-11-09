@@ -17,8 +17,6 @@ function cv(args, message) {
     if (args.length === 0) {
         if (message)
             message.channel.send('Please specify a country using cv [country].');
-        else
-            console.log('Please specify a country using cv [country].');
         return;
     }
 
